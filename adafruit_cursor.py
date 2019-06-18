@@ -46,12 +46,12 @@ class Cursor:
     """Mouse cursor-like interaction for CircuitPython.
 
     :param displayio.Display: CircuitPython display object.
-    :param dict custom_cursor: Information about the cursor including its cursor_path,
-      cursor_scale, cursor_width, cursor_height, cursor_tile_width, and cursor_tile_height.
-    :param bool is_hidden: Cursor hidden by default.
+    :param displayio.Group: CircuitPython group object to append the cursor to.
+    :param int cursor_speed: Speed of the cursor, in pixels.
+    ;param int scale: Scale amount for the cursor in both directions.
+    :param bool is_hidden: Cursor is hidden on init.
     """
-    def __init__(self, display=None, display_group=None, cursor_speed=1, is_hidden=False,
-                    cursor_style="cursor", scale=1):
+    def __init__(self, display=None, display_group=None, is_hidden=False, cursor_speed=1, scale=1):
         self._display = display
         self._scale = scale
         self._display_grp = display_group
@@ -59,18 +59,16 @@ class Cursor:
         self._display_height = display.height
         self._speed = cursor_speed
         self._is_hidden = is_hidden
-        self._cursor_style = cursor_style
         self.generate_cursor()
-
 
     @property
     def scale(self):
-        """Returns the cursor's bitmap scale"""
+        """Returns the cursor's scale amount as an integer."""
         return self._scale
 
     @scale.setter
     def scale(self, scale_value):
-        """Scales the cursor by scale_value in x and y directions
+        """Scales the cursor by scale_value in both directions.
         :param int scale_value: Amount to scale the cursor by.
         """
         self._scale = scale_value
@@ -78,13 +76,13 @@ class Cursor:
 
     @property
     def speed(self):
-        """Returns the cursor's speed."""
+        """Returns the cursor's speed, in pixels."""
         return self._speed
 
     @speed.setter
     def speed(self, speed):
         """Sets the speed of the cursor.
-        :param int speed: Cursor movement speed.
+        :param int speed: Cursor movement speed, in pixels.
         """
         self._speed = speed
 
@@ -127,17 +125,19 @@ class Cursor:
         """Returns if the cursor is hidden or visible on the display."""
         return self._is_hidden
 
+    @property
     def hide(self):
-        """Hides the cursor by removing the cursor subgroup from the display group.
-        """
-        self._is_hidden = True
-        self._display_grp.remove(self._cursor_grp)
-
-    def show(self):
-        """Shows the cursor by appending the cursor subgroup into the display group.
-        """
-        self._is_hidden = False
-        self._display_grp.append(self._cursor_grp)
+        """Returns if the cursor is hidden or visible on the display."""
+        return self._is_hidden
+    
+    @hide.setter
+    def hide(self, is_hidden):
+        if is_hidden:
+            self._is_hidden = True
+            self._display_grp.remove(self._cursor_grp)
+        else:
+            self._is_hidden = False
+            self._display_grp.append(self._cursor_grp)
 
     def generate_cursor(self):
         """Generates a cursor bitmap"""
@@ -147,38 +147,28 @@ class Cursor:
         self._pointer_palette.make_transparent(0)
         self._pointer_palette[1] = 0xFFFFFF
         self._pointer_palette[2] = 0x0000
-        # cursor bitmap generation
-        if self._cursor_style is "plus":
-            for i in range(0, self._pointer_bitmap.width, 2):
-                self._pointer_bitmap[i, 10] = 1
-            for j in range(0, self._pointer_bitmap.height, 2):
-                self._pointer_bitmap[10, j] = 1
-        elif self._cursor_style is "rectangle":
-            for i in range(0, self._pointer_bitmap.height-1):
-                for j in range(0, self._pointer_bitmap.width-1):
-                    self._pointer_bitmap[i, j] = 1
-        else: # cursor_style defaults to default cursor
-            # left edge
-            for i in range(0, self._pointer_bitmap.height):
-                self._pointer_bitmap[0, i] = 2
-            #for i in range(1, self._pointer_bitmap.height - 1):
-            #    self._pointer_bitmap[1, i] = 1
-
-            for j in range(1, 15):
-                for i in range(j+1, self._pointer_bitmap.height - j):
-                    self._pointer_bitmap[j, i] = 1
-            # right diag.
-            for i in range(1, 15):
-                self._pointer_bitmap[i, i] = 2
-                #self._pointer_bitmap[i, i-1] = 1
-            # bottom diag
-            for i in range(1, 5):
-                self._pointer_bitmap[i, self._pointer_bitmap.height-i] = 2
-                #self._pointer_bitmap[i, self._pointer_bitmap.height-i-1] = 1
-            # bottom flat line
-            for i in range(5, 15):
-                self._pointer_bitmap[i, 15] = 2
-                #self._pointer_bitmap[i-1, 14] = 1
+        # left edge, outline
+        for i in range(0, self._pointer_bitmap.height):
+            self._pointer_bitmap[0, i] = 2
+        # inside fill
+        for j in range(1, 15):
+            for i in range(j+1, self._pointer_bitmap.height - j):
+                self._pointer_bitmap[j, i] = 1
+        # right diag., outline
+        for i in range(1, 15):
+            self._pointer_bitmap[i, i] = 2
+        # bottom diag., outline
+        for i in range(1, 5):
+            self._pointer_bitmap[i, self._pointer_bitmap.height-i] = 2
+        # bottom flat line, outline
+        for i in range(5, 15):
+            self._pointer_bitmap[i, 15] = 2
+        # right side fill
+        for i in range(5, 15):
+            self._pointer_bitmap[i-1, 14] = 1
+            self._pointer_bitmap[i-2, 13] = 1
+            self._pointer_bitmap[i-3, 12] = 1
+            self._pointer_bitmap[i-4, 11] = 1
         # create a tilegrid out of the bitmap and palette
         self._pointer_sprite = displayio.TileGrid(self._pointer_bitmap, pixel_shader=self._pointer_palette)
         self._cursor_grp.append(self._pointer_sprite)

@@ -43,7 +43,6 @@ Implementation Notes
 from micropython import const
 import adafruit_imageload
 import displayio
-import board
 
 __version__ = "0.0.0-auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_Cursor.git"
@@ -52,9 +51,12 @@ class Cursor:
     """Mouse cursor-like interaction for CircuitPython.
 
     :param displayio.Display: CircuitPython display object.
+    :param dict cursor: Information about the cursor including its cursor_path,
+      cursor_scale, cursor_width, cursor_height, cursor_tile_width, and cursor_tile_height.
     """
-    def __init__(self, display=None, cursor_speed = 1, cursor=None):
+    def __init__(self, display=None, display_group=None, cursor=None, cursor_speed = 1):
         self._display = display
+        self._display_grp = display_group
         self._display_width = display.width
         self._display_height = display.height
         self._speed = cursor_speed
@@ -87,7 +89,7 @@ class Cursor:
         """
         if (self._cursor_grp.x - self._speed < 0):
             self._cursor_grp.x = self._cursor_grp.x + 1
-        elif self._cursor_grp.x + self._speed > self._display_width - 45:
+        elif self._cursor_grp.x + self._speed > self._display_width - 25:
             self._cursor_grp.x = self._cursor_grp.x - 1
         else:
             self._cursor_grp.x = x_val
@@ -104,7 +106,7 @@ class Cursor:
         """
         if (self._cursor_grp.y - self._speed < 0):
             self._cursor_grp.y = self._cursor_grp.y + 1
-        elif self._cursor_grp.y + self._speed > self._display_height - 45:
+        elif self._cursor_grp.y + self._speed > self._display_height - 25:
             self._cursor_grp.y = self._cursor_grp.y - 1
         else:
             self._cursor_grp.y = y_val        
@@ -112,6 +114,8 @@ class Cursor:
 
     def load_custom_cursor(self, cursor_info):
         """ Loads and creates a custom cursor image from a defined spritesheet.
+        :param dict cursor: Information about the cursor including its cursor_path,
+          cursor_scale, cursor_width, cursor_height, cursor_tile_width, and cursor_tile_height.
         """
         self._sprite_sheet, self._palette = adafruit_imageload.load(cursor_info['cursor_path'],
                                                 bitmap=displayio.Bitmap,
@@ -122,5 +126,7 @@ class Cursor:
                                     tile_width = cursor_info['cursor_tile_width'],
                                     tile_height = cursor_info['cursor_tile_height'])
         self._cursor_grp = displayio.Group(max_size = 1, scale=cursor_info['cursor_scale'])
+        # add sprite to cursor subgroup
         self._cursor_grp.append(self._sprite)
-        self._display.show(self._cursor_grp)
+        # append cursor subgroup to display group
+        self._display_grp.append(self._cursor_grp)

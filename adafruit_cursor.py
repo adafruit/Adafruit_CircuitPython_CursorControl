@@ -25,7 +25,6 @@
 
 Simulated mouse cursor for display interaction
 
-
 * Author(s): Brent Rubell
 
 Implementation Notes
@@ -37,10 +36,7 @@ Implementation Notes
 
 * Adafruit CircuitPython firmware for the supported boards:
   https://github.com/adafruit/circuitpython/releases
-
-* Adafruit's ImageLoad Library: https://github.com/adafruit/Adafruit_CircuitPython_ImageLoad/
 """
-import adafruit_imageload
 import displayio
 
 __version__ = "0.0.0-auto.0"
@@ -50,22 +46,35 @@ class Cursor:
     """Mouse cursor-like interaction for CircuitPython.
 
     :param displayio.Display: CircuitPython display object.
-    :param dict cursor: Information about the cursor including its cursor_path,
+    :param dict custom_cursor: Information about the cursor including its cursor_path,
       cursor_scale, cursor_width, cursor_height, cursor_tile_width, and cursor_tile_height.
     :param bool is_hidden: Cursor hidden by default.
     """
-    def __init__(self, display=None, display_group=None, cursor=None,
-                 cursor_speed=1, is_hidden=False):
+    def __init__(self, display=None, display_group=None, cursor_speed=1, is_hidden=False,
+                    cursor_style="cursor", scale=1):
         self._display = display
+        self._scale = scale
         self._display_grp = display_group
         self._display_width = display.width
         self._display_height = display.height
         self._speed = cursor_speed
         self._is_hidden = is_hidden
-        try:
-            self.load_cursor_image(cursor)
-        except:
-            raise TypeError('Cursor info not found!')
+        self._cursor_style = cursor_style
+        self.generate_cursor()
+
+
+    @property
+    def scale(self):
+        """Returns the cursor's bitmap scale"""
+        return self._scale
+
+    @scale.setter
+    def scale(self, scale_value):
+        """Scales the cursor by scale_value in x and y directions
+        :param int scale_value: Amount to scale the cursor by.
+        """
+        self._scale = scale_value
+        self._cursor_grp.scale = scale_value
 
     @property
     def speed(self):
@@ -130,20 +139,70 @@ class Cursor:
         self._is_hidden = False
         self._display_grp.append(self._cursor_grp)
 
-    def load_cursor_image(self, cursor_info):
-        """Loads and creates a custom cursor image from a defined spritesheet.
-        :param dict cursor: Information about the cursor including its cursor_path,
-          cursor_scale, cursor_width, cursor_height, cursor_tile_width, and cursor_tile_height.
+    def generate_cursor(self):
+        """Generates a cursor bitmap"""
+        self._cursor_grp = displayio.Group(max_size=1, scale=self._scale)
+        self._pointer_bitmap = displayio.Bitmap(20, 20, 3)
+        self._pointer_palette = displayio.Palette(3)
+        self._pointer_palette.make_transparent(0)
+        self._pointer_palette[1] = 0xFFFFFF
+        self._pointer_palette[2] = 0x0000
+        # cursor bitmap generation
+        if self._cursor_style is "plus":
+            for i in range(0, self._pointer_bitmap.width, 2):
+                self._pointer_bitmap[i, 10] = 1
+            for j in range(0, self._pointer_bitmap.height, 2):
+                self._pointer_bitmap[10, j] = 1
+        elif self._cursor_style is "rectangle":
+            for i in range(0, self._pointer_bitmap.height-1):
+                for j in range(0, self._pointer_bitmap.width-1):
+                    self._pointer_bitmap[i, j] = 1
+        else: # cursor_style defaults to default cursor
+            # left edge
+            for i in range(0, self._pointer_bitmap.height):
+                self._pointer_bitmap[0, i] = 2
+            #for i in range(1, self._pointer_bitmap.height - 1):
+            #    self._pointer_bitmap[1, i] = 1
+
+            for j in range(1, 15):
+                for i in range(j+1, self._pointer_bitmap.height - j):
+                    self._pointer_bitmap[j, i] = 1
+            # right diag.
+            for i in range(1, 15):
+                self._pointer_bitmap[i, i] = 2
+                #self._pointer_bitmap[i, i-1] = 1
+            # bottom diag
+            for i in range(1, 5):
+                self._pointer_bitmap[i, self._pointer_bitmap.height-i] = 2
+                #self._pointer_bitmap[i, self._pointer_bitmap.height-i-1] = 1
+            # bottom flat line
+            for i in range(5, 15):
+                self._pointer_bitmap[i, 15] = 2
+                #self._pointer_bitmap[i-1, 14] = 1
+        # create a tilegrid out of the bitmap and palette
+        self._pointer_sprite = displayio.TileGrid(self._pointer_bitmap, pixel_shader=self._pointer_palette)
+        self._cursor_grp.append(self._pointer_sprite)
+        self._display_grp.append(self._cursor_grp)
+
+    def load_cursor_bitmap(self, cursor_path, sheet_width, sheet_height, tile_width, tile_height):
+        """Loads and creates a custom cursor bitmap from a sprite sheet bitmap image.
+        :param str cursor_path: Path to cursor bitmap on the CIRCUITPY file system.
+        :param int sheet_width: Width of sprite sheet bitmap, in pixels .
+        :param int sheet_height: Height of sprite sheet bitmap, in pixels.
+        :param int tile_width: Width of cursor image, in pixels.
+        :param int tile_height: Height of cursor, in pixels
         """
-        self._sprite_sheet, self._palette = adafruit_imageload.load(cursor_info['cursor_path'],
+        import adafruit_imageload
+        # remove a pre-generated cursor image
+        self._cursor_grp.remove(self._pointer_sprite)
+        self._sprite_sheet, self._palette = adafruit_imageload.load(cursor_path,
                                                                     bitmap=displayio.Bitmap,
                                                                     palette=displayio.Palette)
         self._sprite = displayio.TileGrid(self._sprite_sheet, pixel_shader=self._palette,
-                                          width=cursor_info['cursor_width'],
-                                          height=cursor_info['cursor_height'],
-                                          tile_width=cursor_info['cursor_tile_width'],
-                                          tile_height=cursor_info['cursor_tile_height'])
-        self._cursor_grp = displayio.Group(max_size=1, scale=cursor_info['cursor_scale'])
+                                          width=sheet_width,
+                                          height=sheet_height,
+                                          tile_width=tile_width,
+                                          tile_height=tile_height)
+        self._cursor_grp = displayio.Group(max_size=1, scale=self._scale)
         self._cursor_grp.append(self._sprite)
-        if not self._is_hidden:
-            self._display_grp.append(self._cursor_grp)
+        self._display_grp.append(self._cursor_grp)

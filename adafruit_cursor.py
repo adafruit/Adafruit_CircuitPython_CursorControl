@@ -52,22 +52,14 @@ class Cursor:
     """Mouse cursor-like interaction for CircuitPython.
 
     :param displayio.Display: CircuitPython display object.
-    :param int cursor_speed: Mouse cursor speed. 
-    :param int cursor width: Width of cursor, in pixels.
-    :param int cursor height: Height of cursor, in pixels.
-    :param str cursor_path: filepath to custom cursor image spritesheet, defaults
-        to None.
-    :param int cursor_scale: Size of cursor, scales pixels in both x and y directions.
     """
-    def __init__(self, display, cursor_width, cursor_height, cursor_speed = 1, cursor_path = None,
-                  cursor_scale = 1):
+    def __init__(self, display=None, cursor_speed = 1, cursor=None):
         self._display = display
         self._display_width = display.width
         self._display_height = display.height
         self._speed = cursor_speed
-        self._cursor_scale = cursor_scale
-        if cursor_path:
-            self.load_custom_cursor(cursor_path, cursor_width, cursor_height, self._cursor_scale)
+        if cursor:
+            self.load_custom_cursor(cursor)
         self.x = int(self._display_width/2)
         self.y = int(self._display_height/2)
 
@@ -118,21 +110,17 @@ class Cursor:
             self._cursor_grp.y = y_val        
 
 
-    def load_custom_cursor(self, filepath, grid_width, grid_height, cursor_scale):
+    def load_custom_cursor(self, cursor_info):
         """ Loads and creates a custom cursor image from a defined spritesheet.
-        :param str filepath: File path to a 50x50px cursor bitmap sprite sheet.
-        :param int grid_width: Width of the cursor image, in pixels.
-        :param int grid_height: Height of the cursor image, in pixels.
-        :param int cursor_scale: Scales each pixel in the cursor in both directions.
         """
-        self._sprite_sheet, self._palette = adafruit_imageload.load(filepath,
+        self._sprite_sheet, self._palette = adafruit_imageload.load(cursor_info['cursor_path'],
                                                 bitmap=displayio.Bitmap,
                                                 palette=displayio.Palette)
         self._sprite = displayio.TileGrid(self._sprite_sheet, pixel_shader=self._palette,
-                                    width = 1,
-                                    height = 1,
-                                    tile_width = 16,
-                                    tile_height = 16)
-        self._cursor_grp = displayio.Group(max_size = 1, scale=cursor_scale)
+                                    width = cursor_info['cursor_width'],
+                                    height = cursor_info['cursor_height'],
+                                    tile_width = cursor_info['cursor_tile_width'],
+                                    tile_height = cursor_info['cursor_tile_height'])
+        self._cursor_grp = displayio.Group(max_size = 1, scale=cursor_info['cursor_scale'])
         self._cursor_grp.append(self._sprite)
         self._display.show(self._cursor_grp)

@@ -53,15 +53,19 @@ class Cursor:
     :param displayio.Display: CircuitPython display object.
     :param dict cursor: Information about the cursor including its cursor_path,
       cursor_scale, cursor_width, cursor_height, cursor_tile_width, and cursor_tile_height.
+    :param bool is_hidden: Cursor hidden by default.
     """
-    def __init__(self, display=None, display_group=None, cursor=None, cursor_speed = 1):
+    def __init__(self, display=None, display_group=None, cursor=None, cursor_speed = 1, is_hidden=False):
         self._display = display
         self._display_grp = display_group
         self._display_width = display.width
         self._display_height = display.height
         self._speed = cursor_speed
-        if cursor:
-            self.load_custom_cursor(cursor)
+        self._is_hidden = is_hidden
+        try:
+            self.load_cursor_image(cursor)
+        except:
+            raise TypeError('Cursor info not found!')
         self.x = int(self._display_width/2)
         self.y = int(self._display_height/2)
 
@@ -111,9 +115,25 @@ class Cursor:
         else:
             self._cursor_grp.y = y_val        
 
+    @property
+    def is_hidden(self):
+        """Returns if the cursor is hidden or visible on the display."""
+        return self._is_hidden
 
-    def load_custom_cursor(self, cursor_info):
-        """ Loads and creates a custom cursor image from a defined spritesheet.
+    def hide(self):
+        """Hides the cursor by removing the cursor subgroup from the display group.
+        """
+        self._is_hidden = True
+        self._display_grp.remove(self._cursor_grp)
+
+    def show(self):
+        """Shows the cursor by inserting the cursor subgroup into the display group. 
+        """
+        self._is_hidden = False
+        self._display_grp.insert(0, self._cursor_grp)
+
+    def load_cursor_image(self, cursor_info):
+        """Loads and creates a custom cursor image from a defined spritesheet.
         :param dict cursor: Information about the cursor including its cursor_path,
           cursor_scale, cursor_width, cursor_height, cursor_tile_width, and cursor_tile_height.
         """
@@ -126,7 +146,6 @@ class Cursor:
                                     tile_width = cursor_info['cursor_tile_width'],
                                     tile_height = cursor_info['cursor_tile_height'])
         self._cursor_grp = displayio.Group(max_size = 1, scale=cursor_info['cursor_scale'])
-        # add sprite to cursor subgroup
         self._cursor_grp.append(self._sprite)
-        # append cursor subgroup to display group
-        self._display_grp.append(self._cursor_grp)
+        if not self._is_hidden:
+            self._display_grp.append(self._cursor_grp)

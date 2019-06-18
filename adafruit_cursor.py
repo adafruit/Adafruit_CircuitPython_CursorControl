@@ -55,20 +55,19 @@ class Cursor:
     :param int cursor_speed: Mouse cursor speed. 
     :param int cursor width: Width of cursor, in pixels.
     :param int cursor height: Height of cursor, in pixels.
-    :param str custom_cursor: filepath to custom cursor image spritesheet, defaults
+    :param str cursor_path: filepath to custom cursor image spritesheet, defaults
         to None.
+    :param int cursor_scale: Size of cursor, scales pixels in both x and y directions.
     """
-    def __init__(self, display, cursor_width, cursor_height, cursor_speed = 1, custom_cursor = None,):
+    def __init__(self, display, cursor_width, cursor_height, cursor_speed = 1, cursor_path = None,
+                  cursor_scale = 1):
         self._display = display
         self._display_width = display.width
         self._display_height = display.height
         self._speed = cursor_speed
-        if custom_cursor:
-            print('loading custom cursor')
-            self.load_custom_cursor(custom_cursor, cursor_width, cursor_height)
-            self._display.show(self._cursor_grp)
-        else:
-            print('TODO: Implement a display_shapes native cursor image')
+        self._cursor_scale = cursor_scale
+        if cursor_path:
+            self.load_custom_cursor(cursor_path, cursor_width, cursor_height, self._cursor_scale)
         self.x = int(self._display_width/2)
         self.y = int(self._display_height/2)
 
@@ -119,19 +118,21 @@ class Cursor:
             self._cursor_grp.y = y_val        
 
 
-    def load_custom_cursor(self, filepath, grid_width, grid_height):
+    def load_custom_cursor(self, filepath, grid_width, grid_height, cursor_scale):
         """ Loads and creates a custom cursor image from a defined spritesheet.
         :param str filepath: File path to a 50x50px cursor bitmap sprite sheet.
         :param int grid_width: Width of the cursor image, in pixels.
         :param int grid_height: Height of the cursor image, in pixels.
+        :param int cursor_scale: Scales each pixel in the cursor in both directions.
         """
-        self._sprite_sheet, self._palette = adafruit_imageload.load("/cursor.bmp",
+        self._sprite_sheet, self._palette = adafruit_imageload.load(filepath,
                                                 bitmap=displayio.Bitmap,
                                                 palette=displayio.Palette)
         self._sprite = displayio.TileGrid(self._sprite_sheet, pixel_shader=self._palette,
-                                    width = grid_width,
-                                    height = grid_height,
-                                    tile_width = 23,
-                                    tile_height = 26)
-        self._cursor_grp = displayio.Group(scale=2)
+                                    width = 1,
+                                    height = 1,
+                                    tile_width = 16,
+                                    tile_height = 16)
+        self._cursor_grp = displayio.Group(max_size = 1, scale=cursor_scale)
         self._cursor_grp.append(self._sprite)
+        self._display.show(self._cursor_grp)

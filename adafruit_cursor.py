@@ -66,8 +66,6 @@ class Cursor:
             self.load_cursor_image(cursor)
         except:
             raise TypeError('Cursor info not found!')
-        x = 50
-        self.y = int(self._display_height/2)
 
     @property
     def speed(self):
@@ -93,9 +91,9 @@ class Cursor:
         """
         if (self._cursor_grp.x - self._speed < 0):
             self._cursor_grp.x = self._cursor_grp.x + 1
-        elif self._cursor_grp.x + self._speed > self._display_width - 25:
+        elif (self._cursor_grp.x + self._speed > self._display_width - 25):
             self._cursor_grp.x = self._cursor_grp.x - 1
-        else:
+        elif not self._is_hidden:
             self._cursor_grp.x = x_val
 
     @property
@@ -112,7 +110,7 @@ class Cursor:
             self._cursor_grp.y = self._cursor_grp.y + 1
         elif self._cursor_grp.y + self._speed > self._display_height - 25:
             self._cursor_grp.y = self._cursor_grp.y - 1
-        else:
+        elif not self._is_hidden:
             self._cursor_grp.y = y_val        
 
     @property

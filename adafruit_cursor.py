@@ -66,7 +66,7 @@ class Cursor:
             self.load_cursor_image(cursor)
         except:
             raise TypeError('Cursor info not found!')
-        self.x = int(self._display_width/2)
+        x = 50
         self.y = int(self._display_height/2)
 
     @property
@@ -127,10 +127,10 @@ class Cursor:
         self._display_grp.remove(self._cursor_grp)
 
     def show(self):
-        """Shows the cursor by inserting the cursor subgroup into the display group. 
+        """Shows the cursor by appending the cursor subgroup into the display group. 
         """
         self._is_hidden = False
-        self._display_grp.insert(0, self._cursor_grp)
+        self._display_grp.append(self._cursor_grp)
 
     def load_cursor_image(self, cursor_info):
         """Loads and creates a custom cursor image from a defined spritesheet.

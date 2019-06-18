@@ -40,7 +40,6 @@ Implementation Notes
 
 * Adafruit's ImageLoad Library: https://github.com/adafruit/Adafruit_CircuitPython_ImageLoad/
 """
-from micropython import const
 import adafruit_imageload
 import displayio
 
@@ -55,7 +54,8 @@ class Cursor:
       cursor_scale, cursor_width, cursor_height, cursor_tile_width, and cursor_tile_height.
     :param bool is_hidden: Cursor hidden by default.
     """
-    def __init__(self, display=None, display_group=None, cursor=None, cursor_speed = 1, is_hidden=False):
+    def __init__(self, display=None, display_group=None, cursor=None,
+                 cursor_speed=1, is_hidden=False):
         self._display = display
         self._display_grp = display_group
         self._display_width = display.width
@@ -71,7 +71,7 @@ class Cursor:
     def speed(self):
         """Returns the cursor's speed."""
         return self._speed
-    
+
     @speed.setter
     def speed(self, speed):
         """Sets the speed of the cursor.
@@ -89,9 +89,9 @@ class Cursor:
         """Sets the x-value of the cursor.
         :param int x_val: x position, in pixels.
         """
-        if (self._cursor_grp.x - self._speed < 0):
+        if self._cursor_grp.x - self._speed < 0:
             self._cursor_grp.x = self._cursor_grp.x + 1
-        elif (self._cursor_grp.x + self._speed > self._display_width - 25):
+        elif self._cursor_grp.x + self._speed > self._display_width - 25:
             self._cursor_grp.x = self._cursor_grp.x - 1
         elif not self._is_hidden:
             self._cursor_grp.x = x_val
@@ -106,12 +106,12 @@ class Cursor:
         """Sets the y-value of the cursor.
         :param int y_val: y position, in pixels.
         """
-        if (self._cursor_grp.y - self._speed < 0):
+        if self._cursor_grp.y - self._speed < 0:
             self._cursor_grp.y = self._cursor_grp.y + 1
         elif self._cursor_grp.y + self._speed > self._display_height - 25:
             self._cursor_grp.y = self._cursor_grp.y - 1
         elif not self._is_hidden:
-            self._cursor_grp.y = y_val        
+            self._cursor_grp.y = y_val
 
     @property
     def is_hidden(self):
@@ -125,7 +125,7 @@ class Cursor:
         self._display_grp.remove(self._cursor_grp)
 
     def show(self):
-        """Shows the cursor by appending the cursor subgroup into the display group. 
+        """Shows the cursor by appending the cursor subgroup into the display group.
         """
         self._is_hidden = False
         self._display_grp.append(self._cursor_grp)
@@ -136,14 +136,14 @@ class Cursor:
           cursor_scale, cursor_width, cursor_height, cursor_tile_width, and cursor_tile_height.
         """
         self._sprite_sheet, self._palette = adafruit_imageload.load(cursor_info['cursor_path'],
-                                                bitmap=displayio.Bitmap,
-                                                palette=displayio.Palette)
+                                                                    bitmap=displayio.Bitmap,
+                                                                    palette=displayio.Palette)
         self._sprite = displayio.TileGrid(self._sprite_sheet, pixel_shader=self._palette,
-                                    width = cursor_info['cursor_width'],
-                                    height = cursor_info['cursor_height'],
-                                    tile_width = cursor_info['cursor_tile_width'],
-                                    tile_height = cursor_info['cursor_tile_height'])
-        self._cursor_grp = displayio.Group(max_size = 1, scale=cursor_info['cursor_scale'])
+                                          width=cursor_info['cursor_width'],
+                                          height=cursor_info['cursor_height'],
+                                          tile_width=cursor_info['cursor_tile_width'],
+                                          tile_height=cursor_info['cursor_tile_height'])
+        self._cursor_grp = displayio.Group(max_size=1, scale=cursor_info['cursor_scale'])
         self._cursor_grp.append(self._sprite)
         if not self._is_hidden:
             self._display_grp.append(self._cursor_grp)

@@ -1,16 +1,16 @@
 # using adafruit_cursor with adafruit_button
 import time
+
 import board
-from micropython import const
 import digitalio
-from gamepadshift import GamePadShift
+from micropython import const
+
+import adafruit_cursor
+import displayio
 from adafruit_bitmap_font import bitmap_font
 from adafruit_button import Button
-import displayio
-import adafruit_cursor
-
-import busio
-import adafruit_lis3dh
+from adafruit_display_text import label
+from gamepadshift import GamePadShift
 
 # PyBadge Button Masks
 BUTTON_LEFT = const(128)
@@ -25,111 +25,123 @@ pad = GamePadShift(digitalio.DigitalInOut(board.BUTTON_CLOCK),
                    digitalio.DigitalInOut(board.BUTTON_OUT),
                    digitalio.DigitalInOut(board.BUTTON_LATCH))
 
-# Hardware I2C setup. Use the CircuitPlayground built-in accelerometer if available;
-# otherwise check I2C pins.
-if hasattr(board, 'ACCELEROMETER_SCL'):
-    i2c = busio.I2C(board.ACCELEROMETER_SCL, board.ACCELEROMETER_SDA)
-    int1 = digitalio.DigitalInOut(board.ACCELEROMETER_INTERRUPT)
-    lis3dh = adafruit_lis3dh.LIS3DH_I2C(i2c, address=0x19, int1=int1)
-else:
-    i2c = busio.I2C(board.SCL, board.SDA)
-    int1 = digitalio.DigitalInOut(board.D9)  # Set this to the correct pin for the interrupt!
-    lis3dh = adafruit_lis3dh.LIS3DH_I2C(i2c, int1=int1)
-lis3dh.range = adafruit_lis3dh.RANGE_8_G
-lis3dh.set_tap(1, 60)
+# Load the font
+THE_FONT = "/fonts/Arial-12.bdf"
+font = bitmap_font.load_font(THE_FONT)
 
 # Create the display
 display = board.DISPLAY
-splash_grp = displayio.Group(max_size=20)
 
-# Make the display context
-BUTTON_WIDTH = 80
-BUTTON_HEIGHT = 40
-BUTTON_MARGIN = 20
+# Create the display context
+splash = displayio.Group(max_size=22)
 
 ##########################################################################
 # Make a background color fill
+
 color_bitmap = displayio.Bitmap(320, 240, 1)
 color_palette = displayio.Palette(1)
 color_palette[0] = 0x404040
 bg_sprite = displayio.TileGrid(color_bitmap,
                                pixel_shader=color_palette,
                                x=0, y=0)
-splash_grp.append(bg_sprite)
+splash.append(bg_sprite)
+
 ##########################################################################
 
-# Load the font
-THE_FONT = "/fonts/Arial-12.bdf"
-font = bitmap_font.load_font(THE_FONT)
+# Set up button size info
+BUTTON_WIDTH = 80
+BUTTON_HEIGHT = 40
+BUTTON_MARGIN = 20
 
+# Create the buttons
 buttons = []
-button_0 = Button(x=BUTTON_MARGIN, y=BUTTON_MARGIN,
-                  width=BUTTON_WIDTH, height=BUTTON_HEIGHT,
-                  label="click me!", label_font=font)
-buttons.append(button_0)
 
-button_2 = Button(x=BUTTON_MARGIN*3+2*BUTTON_WIDTH, y=BUTTON_MARGIN,
+button_speed_inc = Button(x=BUTTON_MARGIN, y=BUTTON_MARGIN+BUTTON_HEIGHT,
                   width=BUTTON_WIDTH, height=BUTTON_HEIGHT,
-                  label="or me!", label_font=font, label_color=0x0000FF,
-                  fill_color=0x00FF00, outline_color=0xFF0000)
-buttons.append(button_2)
+                  label="+ Speed", label_font=font)
+buttons.append(button_speed_inc)
 
+button_speed_dec = Button(x=BUTTON_MARGIN, y=BUTTON_MARGIN*4+BUTTON_HEIGHT,
+                  width=BUTTON_WIDTH, height=BUTTON_HEIGHT,
+                  label="- Speed", label_font=font)
+buttons.append(button_speed_dec)
+
+button_scale_pos = Button(x=BUTTON_MARGIN*3+2*BUTTON_WIDTH, y=BUTTON_MARGIN+BUTTON_HEIGHT,
+                  width=BUTTON_WIDTH, height=BUTTON_HEIGHT,
+                  label="+ Scale", label_font=font, style=Button.SHADOWRECT)
+buttons.append(button_scale_pos)
+
+button_scale_neg = Button(x=BUTTON_MARGIN*3+2*BUTTON_WIDTH, y=BUTTON_MARGIN*4+BUTTON_HEIGHT,
+                  width=BUTTON_WIDTH, height=BUTTON_HEIGHT,
+                  label="- Scale", label_font=font, style=Button.SHADOWRECT)
+buttons.append(button_scale_neg)
+
+# Show the button
 for b in buttons:
-    splash_grp.append(b.group)
+    splash.append(b.group)
 
-# create the display object
-display = board.DISPLAY
+# Create a text label
+text_label = label.Label(font, text="CircuitPython Cursor!", color=0x00FF00,
+                            x = 100, y = 20)
+splash.append(text_label)
+
+text_speed = label.Label(font, max_glyphs = 11, color=0x00FF00,
+                            x = 120, y = 40)
+splash.append(text_speed)
+
+text_scale = label.Label(font, max_glyphs = 11, color=0x00FF00,
+                            x = 120, y = 60)
+splash.append(text_scale)
 
 # initialize the mouse cursor object
-# cursor style (plus, triangle, pointer, rectangle)
-mouse_cursor = adafruit_cursor.Cursor(display, display_group=splash_grp)
+mouse_cursor = adafruit_cursor.Cursor(display, display_group=splash)
 
 # show displayio group
-display.show(splash_grp)
+display.show(splash)
 
-def check_dpad(pad_btns):
-    """Checks the d-pad presses"""
-    if (pad_btns & BUTTON_RIGHT) > 0:
+def check_dpad(d_pad_buttons):
+    """Checks the directional pad for button presses."""
+    if pressed & BUTTON_RIGHT:
         mouse_cursor.x += mouse_cursor.speed
-    elif (pad_btns & BUTTON_LEFT) > 0:
+    elif pressed & BUTTON_LEFT:
         mouse_cursor.x -= mouse_cursor.speed
-    elif (pad_btns & BUTTON_UP) > 0:
-        mouse_cursor.y -= mouse_cursor.speed
-    elif (pad_btns & BUTTON_DOWN) > 0:
+    if pressed & BUTTON_DOWN:
         mouse_cursor.y += mouse_cursor.speed
+    elif pressed & BUTTON_UP:
+        mouse_cursor.y -= mouse_cursor.speed
 
-def check_btns(pad_btns):
-    """Checks a/b button presses"""
-    global is_a_clicked
-    if (pad_btns & BUTTON_B) > 0:
+is_pressed = False
+while True:
+    display.wait_for_frame()
+    text_speed.text = 'Speed: {0}'.format(mouse_cursor.speed)
+    text_scale.text = 'Scale: {0}'.format(mouse_cursor.scale)
+    pressed = pad.get_pressed()
+    check_dpad(pressed)
+    if is_pressed:
+        if not pressed & (BUTTON_A | BUTTON_B):
+            # buttons de-pressed
+            is_pressed = False
+            for i, b in enumerate(buttons):
+                b.selected=False
+        # otherwise, continue holding
+        continue
+    if pressed & BUTTON_B:
+        is_pressed = True
         if mouse_cursor.hide:
-            mouse_cursor.hide = False 
+            mouse_cursor.hide = False
         else:
             mouse_cursor.hide = True
-    elif ((pad_btns & BUTTON_A) > 0) and not mouse_cursor.hide:
-        is_a_clicked = True
-
-is_a_clicked = False
-current_btns = pad.get_pressed()
-while True:
-    if lis3dh.tapped:
-      print('tapped!')
-      mouse_cursor.scale = 2
-      time.sleep(0.5)
-      mouse_cursor.scale = 1
-    btns = pad.get_pressed()
-    check_dpad(btns)
-    if current_btns != btns:
-        check_btns(btns)
-        current_btns = btns
-    # check the coordinates of the cursor
-    p = mouse_cursor.x, mouse_cursor.y
-    if p:
+    if pressed & BUTTON_A:
+        is_pressed = True
         for i, b in enumerate(buttons):
-            if b.contains(p) and is_a_clicked:
+            if b.contains((mouse_cursor.x, mouse_cursor.y)):
                 print("Button %d pressed"%i)
-                b.selected = True
-                is_a_clicked = False
-            else:
-                b.selected = False
-    time.sleep(0.01)
+                if i == 0: # Increase the cursor speed
+                    mouse_cursor.speed += 1
+                elif i == 1: # Decrease the cursor speed
+                    mouse_cursor.speed -= 1
+                if i == 2: # Increase the cursor scale
+                    mouse_cursor.scale += 1
+                elif i == 3: # Decrease the cursor scale
+                    mouse_cursor.scale -= 1
+                b.selected=True

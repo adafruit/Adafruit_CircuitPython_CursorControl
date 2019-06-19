@@ -51,7 +51,7 @@ class Cursor:
     ;param int scale: Scale amount for the cursor in both directions.
     :param bool is_hidden: Cursor is hidden on init.
     """
-    def __init__(self, display=None, display_group=None, is_hidden=False, cursor_speed=1, scale=1):
+    def __init__(self, display=None, display_group=None, is_hidden=False, cursor_speed=5, scale=1):
         self._display = display
         self._scale = scale
         self._display_grp = display_group
@@ -71,8 +71,9 @@ class Cursor:
         """Scales the cursor by scale_value in both directions.
         :param int scale_value: Amount to scale the cursor by.
         """
-        self._scale = scale_value
-        self._cursor_grp.scale = scale_value
+        if scale_value > 0:
+            self._scale = scale_value
+            self._cursor_grp.scale = scale_value
 
     @property
     def speed(self):

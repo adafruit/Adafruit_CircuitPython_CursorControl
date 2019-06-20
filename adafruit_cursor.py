@@ -23,7 +23,7 @@
 `adafruit_cursor`
 ================================================================================
 
-Simulated mouse cursor for display interaction
+Simulated mouse cursor for interaction using displayio Groups.
 
 * Author(s): Brent Rubell
 
@@ -51,15 +51,14 @@ class Cursor:
     ;param int scale: Scale amount for the cursor in both directions.
     :param bool is_hidden: Cursor is hidden on init.
     """
+    # pylint: disable=too-many-arguments
     def __init__(self, display=None, display_group=None, is_hidden=False, cursor_speed=5, scale=1):
         self._display = display
         self._scale = scale
-        self._display_grp = display_group
-        self._disp_x = display.height
-        self._disp_y = display.width
-        self._disp_sz = self._disp_x - 1, self._disp_y - 1
         self._speed = cursor_speed
         self._is_hidden = is_hidden
+        self._display_grp = display_group
+        self._disp_sz = display.height - 1, display.width - 1
         self.generate_cursor()
 
     @property
@@ -96,7 +95,7 @@ class Cursor:
     @x.setter
     def x(self, x_val):
         """Sets the x-value of the cursor.
-        :param int x_val: x position, in pixels.
+        :param int x_val: cursor x-position, in pixels.
         """
         if x_val < 0 and not self._is_hidden:
             self._cursor_grp.x = self._cursor_grp.x
@@ -113,7 +112,7 @@ class Cursor:
     @y.setter
     def y(self, y_val):
         """Sets the y-value of the cursor.
-        :param int y_val: y position, in pixels.
+        :param int y_val: cursor y-position, in pixels.
         """
         if y_val < 0 and not self._is_hidden:
             self._cursor_grp.y = self._cursor_grp.y
@@ -123,15 +122,10 @@ class Cursor:
             self._cursor_grp.y = y_val
 
     @property
-    def is_hidden(self):
-        """Returns if the cursor is hidden or visible on the display."""
+    def hide(self):
+        """Returns True if the cursor is hidden or visible on the display."""
         return self._is_hidden
 
-    @property
-    def hide(self):
-        """Returns if the cursor is hidden or visible on the display."""
-        return self._is_hidden
-    
     @hide.setter
     def hide(self, is_hidden):
         if is_hidden:
@@ -142,36 +136,32 @@ class Cursor:
             self._display_grp.append(self._cursor_grp)
 
     def generate_cursor(self):
-        """Generates a cursor icon bitmap"""
+        """Generates a cursor icon"""
         self._cursor_grp = displayio.Group(max_size=1, scale=self._scale)
-        self._pointer_bitmap = displayio.Bitmap(20, 20, 3)
-        self._pointer_palette = displayio.Palette(3)
-        self._pointer_palette.make_transparent(0)
-        self._pointer_palette[1] = 0xFFFFFF
-        self._pointer_palette[2] = 0x0000
+        self._cur_bmp = displayio.Bitmap(20, 20, 3)
+        self._cur_palette = displayio.Palette(3)
+        self._cur_palette.make_transparent(0)
+        self._cur_palette[1] = 0xFFFFFF
+        self._cur_palette[2] = 0x0000
         # left edge, outline
-        for i in range(0, self._pointer_bitmap.height):
-            self._pointer_bitmap[0, i] = 2
-        # inside fill
+        for i in range(0, self._cur_bmp.height):
+            self._cur_bmp[0, i] = 2
+        # right diag outline, inside fill
         for j in range(1, 15):
-            for i in range(j+1, self._pointer_bitmap.height - j):
-                self._pointer_bitmap[j, i] = 1
-        # right diag., outline
-        for i in range(1, 15):
-            self._pointer_bitmap[i, i] = 2
+            self._cur_bmp[j, j] = 2
+            for i in range(j+1, self._cur_bmp.height - j):
+                self._cur_bmp[j, i] = 1
         # bottom diag., outline
         for i in range(1, 5):
-            self._pointer_bitmap[i, self._pointer_bitmap.height-i] = 2
-        # bottom flat line, outline
+            self._cur_bmp[i, self._cur_bmp.height-i] = 2
+        # bottom flat line, right side fill
         for i in range(5, 15):
-            self._pointer_bitmap[i, 15] = 2
-        # right side fill
-        for i in range(5, 15):
-            self._pointer_bitmap[i-1, 14] = 1
-            self._pointer_bitmap[i-2, 13] = 1
-            self._pointer_bitmap[i-3, 12] = 1
-            self._pointer_bitmap[i-4, 11] = 1
-        # create a tilegrid out of the bitmap and palette
-        self._pointer_sprite = displayio.TileGrid(self._pointer_bitmap, pixel_shader=self._pointer_palette)
-        self._cursor_grp.append(self._pointer_sprite)
+            self._cur_bmp[i, 15] = 2
+            self._cur_bmp[i-1, 14] = 1
+            self._cur_bmp[i-2, 13] = 1
+            self._cur_bmp[i-3, 12] = 1
+            self._cur_bmp[i-4, 11] = 1
+        self._cur_sprite = displayio.TileGrid(self._cur_bmp,
+                                              pixel_shader=self._cur_palette)
+        self._cursor_grp.append(self._cur_sprite)
         self._display_grp.append(self._cursor_grp)

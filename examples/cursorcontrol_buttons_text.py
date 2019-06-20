@@ -1,4 +1,5 @@
 import board
+from micropython import const
 import digitalio
 import displayio
 from adafruit_bitmap_font import bitmap_font
@@ -6,7 +7,6 @@ from adafruit_button import Button
 from adafruit_cursorcontrol import Cursor
 from adafruit_display_text import label
 from gamepadshift import GamePadShift
-from micropython import const
 
 # PyBadge Button Masks
 BUTTON_LEFT = const(128)

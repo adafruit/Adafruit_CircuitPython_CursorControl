@@ -1,9 +1,9 @@
 import board
 import digitalio
+from micropython import const
 import displayio
 from adafruit_cursorcontrol import Cursor
 from gamepadshift import GamePadShift
-from micropython import const
 
 # PyBadge Button Masks
 BUTTON_LEFT = const(128)

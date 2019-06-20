@@ -23,7 +23,7 @@
 `adafruit_cursor`
 ================================================================================
 
-Simulated mouse cursor for interaction using displayio Groups.
+Mouse cursor for interaction with displayio Groups.
 
 * Author(s): Brent Rubell
 
@@ -37,19 +37,31 @@ Implementation Notes
 * Adafruit CircuitPython firmware for the supported boards:
   https://github.com/adafruit/circuitpython/releases
 """
-import displayio
 
 __version__ = "0.0.0-auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_Cursor.git"
 
 class Cursor:
-    """Mouse cursor-like interaction for CircuitPython.
+    """Mouse cursor interaction for CircuitPython.
 
     :param displayio.Display: CircuitPython display object.
     :param displayio.Group: CircuitPython group object to append the cursor to.
     :param int cursor_speed: Speed of the cursor, in pixels.
     ;param int scale: Scale amount for the cursor in both directions.
     :param bool is_hidden: Cursor is hidden on init.
+
+    Example for creating a cursor layer:
+    .. code-block:: python
+    import adafruit_cursor
+    # Create the display
+    display = board.DISPLAY
+
+    # Create the display context
+    splash = displayio.Group(max_size=22)
+
+    # initialize the mouse cursor object
+    mouse_cursor = adafruit_cursor.Cursor(display, display_group=splash)
+
     """
     # pylint: disable=too-many-arguments
     def __init__(self, display=None, display_group=None, is_hidden=False, cursor_speed=5, scale=1):

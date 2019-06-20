@@ -55,8 +55,9 @@ class Cursor:
         self._display = display
         self._scale = scale
         self._display_grp = display_group
-        self._display_width = display.width
-        self._display_height = display.height
+        self._disp_x = display.height
+        self._disp_y = display.width
+        self._disp_sz = self._disp_x - 1, self._disp_y - 1
         self._speed = cursor_speed
         self._is_hidden = is_hidden
         self.generate_cursor()
@@ -97,10 +98,10 @@ class Cursor:
         """Sets the x-value of the cursor.
         :param int x_val: x position, in pixels.
         """
-        if self._cursor_grp.x - self._speed < 0:
-            self._cursor_grp.x = self._cursor_grp.x + 1
-        elif self._cursor_grp.x + self._speed > self._display_width - 25:
-            self._cursor_grp.x = self._cursor_grp.x - 1
+        if x_val < 0 and not self._is_hidden:
+            self._cursor_grp.x = self._cursor_grp.x
+        elif x_val > self._disp_sz[1] and not self._is_hidden:
+            self._cursor_grp.x = self._cursor_grp.x
         elif not self._is_hidden:
             self._cursor_grp.x = x_val
 
@@ -114,10 +115,10 @@ class Cursor:
         """Sets the y-value of the cursor.
         :param int y_val: y position, in pixels.
         """
-        if self._cursor_grp.y - self._speed < 0:
-            self._cursor_grp.y = self._cursor_grp.y + 1
-        elif self._cursor_grp.y + self._speed > self._display_height - 25:
-            self._cursor_grp.y = self._cursor_grp.y - 1
+        if y_val < 0 and not self._is_hidden:
+            self._cursor_grp.y = self._cursor_grp.y
+        elif y_val > self._disp_sz[0] and not self._is_hidden:
+            self._cursor_grp.y = self._cursor_grp.y
         elif not self._is_hidden:
             self._cursor_grp.y = y_val
 
@@ -141,7 +142,7 @@ class Cursor:
             self._display_grp.append(self._cursor_grp)
 
     def generate_cursor(self):
-        """Generates a cursor bitmap"""
+        """Generates a cursor icon bitmap"""
         self._cursor_grp = displayio.Group(max_size=1, scale=self._scale)
         self._pointer_bitmap = displayio.Bitmap(20, 20, 3)
         self._pointer_palette = displayio.Palette(3)
@@ -173,27 +174,4 @@ class Cursor:
         # create a tilegrid out of the bitmap and palette
         self._pointer_sprite = displayio.TileGrid(self._pointer_bitmap, pixel_shader=self._pointer_palette)
         self._cursor_grp.append(self._pointer_sprite)
-        self._display_grp.append(self._cursor_grp)
-
-    def load_cursor_bitmap(self, cursor_path, sheet_width, sheet_height, tile_width, tile_height):
-        """Loads and creates a custom cursor bitmap from a sprite sheet bitmap image.
-        :param str cursor_path: Path to cursor bitmap on the CIRCUITPY file system.
-        :param int sheet_width: Width of sprite sheet bitmap, in pixels .
-        :param int sheet_height: Height of sprite sheet bitmap, in pixels.
-        :param int tile_width: Width of cursor image, in pixels.
-        :param int tile_height: Height of cursor, in pixels
-        """
-        import adafruit_imageload
-        # remove a pre-generated cursor image
-        self._cursor_grp.remove(self._pointer_sprite)
-        self._sprite_sheet, self._palette = adafruit_imageload.load(cursor_path,
-                                                                    bitmap=displayio.Bitmap,
-                                                                    palette=displayio.Palette)
-        self._sprite = displayio.TileGrid(self._sprite_sheet, pixel_shader=self._palette,
-                                          width=sheet_width,
-                                          height=sheet_height,
-                                          tile_width=tile_width,
-                                          tile_height=tile_height)
-        self._cursor_grp = displayio.Group(max_size=1, scale=self._scale)
-        self._cursor_grp.append(self._sprite)
         self._display_grp.append(self._cursor_grp)

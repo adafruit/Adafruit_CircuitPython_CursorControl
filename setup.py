@@ -17,17 +17,17 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name='adafruit-circuitpython-cursor',
+    name='adafruit-circuitpython-cursorcontrol',
 
     use_scm_version=True,
     setup_requires=['setuptools_scm'],
 
-    description='Simulated mouse cursor for display interaction',
+    description='Mouse cursor for interaction with CircuitPython UI elements.',
     long_description=long_description,
     long_description_content_type='text/x-rst',
 
     # The project's main homepage.
-    url='https://github.com/adafruit/Adafruit_CircuitPython_Cursor',
+    url='https://github.com/adafruit/Adafruit_CircuitPython_CursorControl',
 
     # Author details
     author='Adafruit Industries',
@@ -35,7 +35,7 @@ setup(
 
     install_requires=[
         'Adafruit-Blinka',
-        'adafruit-imageload'
+        'no'
     ],
 
     # Choose your license
@@ -54,11 +54,11 @@ setup(
     ],
 
     # What does your project relate to?
-    keywords='adafruit blinka circuitpython micropython cursor cursor, mouse, input',
+    keywords='adafruit blinka circuitpython micropython cursorcontrol mouse, cursor, ui',
 
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
     # TODO: IF LIBRARY FILES ARE A PACKAGE FOLDER,
     #       CHANGE `py_modules=['...']` TO `packages=['...']`
-    py_modules=['adafruit_cursor'],
+    py_modules=['adafruit_cursorcontrol'],
 )

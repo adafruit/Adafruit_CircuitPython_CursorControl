@@ -1,20 +1,20 @@
 Introduction
 ============
 
-.. image:: https://readthedocs.org/projects/adafruit-circuitpython-cursor/badge/?version=latest
-    :target: https://circuitpython.readthedocs.io/projects/cursor/en/latest/
+.. image:: https://readthedocs.org/projects/adafruit-circuitpython-cursorcontrol/badge/?version=latest
+    :target: https://circuitpython.readthedocs.io/projects/cursorcontrol/en/latest/
     :alt: Documentation Status
 
 .. image:: https://img.shields.io/discord/327254708534116352.svg
     :target: https://discord.gg/nBQh6qu
     :alt: Discord
 
-.. image:: https://travis-ci.com/adafruit/Adafruit_CircuitPython_Cursor.svg?branch=master
-    :target: https://travis-ci.com/adafruit/Adafruit_CircuitPython_Cursor
+.. image:: https://travis-ci.com/adafruit/Adafruit_CircuitPython_CursorControl.svg?branch=master
+    :target: https://travis-ci.com/adafruit/Adafruit_CircuitPython_CursorControl
     :alt: Build Status
 
-Mouse cursor for interaction with CircuitPython UI elements such as
-`buttons <https://github.com/adafruit/Adafruit_CircuitPython_Display_Button>`_.
+Mouse cursor for interaction with CircuitPython UI elements.
+
 
 Dependencies
 =============
@@ -31,18 +31,21 @@ Installing from PyPI
 .. note:: This library is not available on PyPI yet. Install documentation is included
    as a standard element. Stay tuned for PyPI availability!
 
+.. todo:: Remove the above note if PyPI version is/will be available at time of release.
+   If the library is not planned for PyPI, remove the entire 'Installing from PyPI' section.
+
 On supported GNU/Linux systems like the Raspberry Pi, you can install the driver locally `from
-PyPI <https://pypi.org/project/adafruit-circuitpython-cursor/>`_. To install for current user:
+PyPI <https://pypi.org/project/adafruit-circuitpython-cursorcontrol/>`_. To install for current user:
 
 .. code-block:: shell
 
-    pip3 install adafruit-circuitpython-cursor
+    pip3 install adafruit-circuitpython-cursorcontrol
 
 To install system-wide (this may be required in some cases):
 
 .. code-block:: shell
 
-    sudo pip3 install adafruit-circuitpython-cursor
+    sudo pip3 install adafruit-circuitpython-cursorcontrol
 
 To install in a virtual environment in your current project:
 
@@ -51,18 +54,18 @@ To install in a virtual environment in your current project:
     mkdir project-name && cd project-name
     python3 -m venv .env
     source .env/bin/activate
-    pip3 install adafruit-circuitpython-cursor
+    pip3 install adafruit-circuitpython-cursorcontrol
 
 Usage Example
 =============
 
-See examples in examples/ folder.
+.. todo:: Add a quick, simple example. It and other examples should live in the examples folder and be included in docs/examples.rst.
 
 Contributing
 ============
 
 Contributions are welcome! Please read our `Code of Conduct
-<https://github.com/adafruit/Adafruit_CircuitPython_Cursor/blob/master/CODE_OF_CONDUCT.md>`_
+<https://github.com/adafruit/Adafruit_CircuitPython_CursorControl/blob/master/CODE_OF_CONDUCT.md>`_
 before contributing to help this project stay welcoming.
 
 Building locally
@@ -90,7 +93,7 @@ Then run the build:
 
 .. code-block:: shell
 
-    circuitpython-build-bundles --filename_prefix adafruit-circuitpython-cursor --library_location .
+    circuitpython-build-bundles --filename_prefix adafruit-circuitpython-cursorcontrol --library_location .
 
 Sphinx documentation
 -----------------------

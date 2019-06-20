@@ -20,7 +20,7 @@ extensions = [
 # Uncomment the below if you use native CircuitPython modules such as
 # digitalio, micropython and busio. List the modules you use. Without it, the
 # autodoc module docs will fail to generate with a warning.
-autodoc_mock_imports = ["displayio"]
+# autodoc_mock_imports = ["digitalio", "busio"]
 
 
 intersphinx_mapping = {'python': ('https://docs.python.org/3.4', None),'CircuitPython': ('https://circuitpython.readthedocs.io/en/latest/', None)}
@@ -34,7 +34,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Adafruit Cursor Library'
+project = u'Adafruit CursorControl Library'
 copyright = u'2019 Brent Rubell'
 author = u'Brent Rubell'
 
@@ -109,7 +109,7 @@ html_static_path = ['_static']
 html_favicon = '_static/favicon.ico'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'AdafruitCursorLibrarydoc'
+htmlhelp_basename = 'AdafruitCursorcontrolLibrarydoc'
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -135,7 +135,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'AdafruitCursorLibrary.tex', u'AdafruitCursor Library Documentation',
+    (master_doc, 'AdafruitCursorControlLibrary.tex', u'AdafruitCursorControl Library Documentation',
      author, 'manual'),
 ]
 
@@ -144,7 +144,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'AdafruitCursorlibrary', u'Adafruit Cursor Library Documentation',
+    (master_doc, 'AdafruitCursorControllibrary', u'Adafruit CursorControl Library Documentation',
      [author], 1)
 ]
 
@@ -154,7 +154,7 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'AdafruitCursorLibrary', u'Adafruit Cursor Library Documentation',
-     author, 'AdafruitCursorLibrary', 'One line description of project.',
+    (master_doc, 'AdafruitCursorControlLibrary', u'Adafruit CursorControl Library Documentation',
+     author, 'AdafruitCursorControlLibrary', 'One line description of project.',
      'Miscellaneous'),
 ]

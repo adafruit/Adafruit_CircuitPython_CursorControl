@@ -28,8 +28,8 @@ Simple interaction user interface interaction for Adafruit_CursorControl.
 """
 import board
 import digitalio
-import analogio
 from micropython import const
+import analogio
 from gamepadshift import GamePadShift
 
 # PyBadge
@@ -37,10 +37,9 @@ PYBADGE_BUTTON_LEFT = const(128)
 PYBADGE_BUTTON_UP = const(64)
 PYBADGE_BUTTON_DOWN = const(32)
 PYBADGE_BUTTON_RIGHT = const(16)
+# PyBadge & PyGamer
 PYBADGE_BUTTON_A = const(2)
 PYBADGE_BUTTON_B = const(1)
-PYBADGE_BUTTON_SEL = const(8)
-PYBADGE_BUTTON_START = const(4)
 
 class CursorManager:
     """Simple interaction user interface interaction for Adafruit_CursorControl.
@@ -51,6 +50,7 @@ class CursorManager:
     def __init__(self, cursor, buttons=None):
         self._cursor = cursor
         self._btns = buttons
+        self._btn_clicked = None
         self._is_held = False
         self._init_hardware()
 
@@ -64,7 +64,7 @@ class CursorManager:
         """Deinitializes a CursorManager object."""
         self._is_deinited()
         self._pad.deinit()
-        self._cursor_deinit()
+        self._cursor.deinit()
         self._cursor = None
 
     def _is_deinited(self):
@@ -75,38 +75,55 @@ class CursorManager:
 
     def _init_hardware(self):
         """Initializes PyBadge or PyGamer hardware."""
-        if hasattr(board, 'BUTTON_CLOCK') and not hasattr(board, 'SD_CS'):
+        if hasattr(board, 'BUTTON_CLOCK') and not hasattr(board, 'JOYSTICK_X'):
             self._pad_btns = {'btn_left' : PYBADGE_BUTTON_LEFT,
-                                'btn_right' : PYBADGE_BUTTON_RIGHT,
-                                'btn_up' : PYBADGE_BUTTON_UP,
-                                'btn_down' : PYBADGE_BUTTON_DOWN,
-                                'btn_a' : PYBADGE_BUTTON_SEL,
-                                'btn_b' : PYBADGE_BUTTON_START}
+                              'btn_right' : PYBADGE_BUTTON_RIGHT,
+                              'btn_up' : PYBADGE_BUTTON_UP,
+                              'btn_down' : PYBADGE_BUTTON_DOWN,
+                              'btn_a' : PYBADGE_BUTTON_A,
+                              'btn_b' : PYBADGE_BUTTON_B}
         elif hasattr(board, 'JOYSTICK_X'):
             self._joystick_x = analogio.AnalogIn(board.JOYSTICK_X)
             self._joystick_y = analogio.AnalogIn(board.JOYSTICK_Y)
-            self._pad_btns = {'btn_a' : PYBADGE_BUTTON_SEL,
-                                'btn_b' : PYBADGE_BUTTON_START}
+            self._pad_btns = {'btn_a' : PYBADGE_BUTTON_A,
+                              'btn_b' : PYBADGE_BUTTON_B}
         else:
             raise AttributeError('Board must have a D-Pad or Joystick for use with CursorManager!')
         self._pad = GamePadShift(digitalio.DigitalInOut(board.BUTTON_CLOCK),
-                                    digitalio.DigitalInOut(board.BUTTON_OUT),
-                                    digitalio.DigitalInOut(board.BUTTON_LATCH))
+                                 digitalio.DigitalInOut(board.BUTTON_OUT),
+                                 digitalio.DigitalInOut(board.BUTTON_LATCH))
 
     def update(self):
-        """Handles physical interaction, cursor movement, and cursor interaction"""
+        """Updates the cursor object.
+
+        Returns:
+            int: Optionally returns the number of the display button clicked.
+            None: If no display buton object was clicked.
+        """
         pressed = self._pad.get_pressed()
         self._check_cursor_movement(pressed)
-        if self._btns: # button elements exist in user-code
-            btn_clicked = self._check_cursor_click(pressed)
-        
+        if self._is_held:
+            if not pressed & (self._pad_btns['btn_a'] | self._pad_btns['btn_b']):
+                self._is_held = False
+                for i, self._btn_clicked in enumerate(self._btns): # pylint: disable=unused-variable
+                    self._btn_clicked.selected = False
+        if self._btns: # user-defined buttons provided to cursormanager
+            button_num = self._check_cursor_click(pressed)
+            if self._btn_clicked is not None:
+                return button_num
+        return None
 
     def _check_cursor_click(self, pressed):
-        """Returns which display button element has been clicked as an integer."""
+        """Returns which display button element has been clicked as an integer.
+        """
         if pressed & self._pad_btns['btn_a']:
-            for i, b in enumerate(self._btns):
+            self._is_held = True
+            for i, b in enumerate(self._btns): # pylint: disable=unused-variable
                 if b.contains((self._cursor.x, self._cursor.y)):
-                    return b
+                    self._btn_clicked = b
+                    self._btn_clicked.selected = True
+                    return i
+        return None
 
     def _check_cursor_movement(self, pressed=None):
         """Checks the PyBadge D-Pad or the PyGamer's Joystick for movement.

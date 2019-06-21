@@ -2,7 +2,7 @@ import board
 import digitalio
 from micropython import const
 import displayio
-from adafruit_cursorcontrol import Cursor
+from adafruit_cursorcontrol.adafruit_cursorcontrol import Cursor
 from gamepadshift import GamePadShift
 
 # PyBadge Button Masks

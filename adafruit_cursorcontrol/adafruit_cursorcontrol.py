@@ -75,6 +75,24 @@ class Cursor:
         self._disp_sz = display.height - 1, display.width - 1
         self.generate_cursor()
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exception_type, exception_value, traceback):
+        self.deinit()
+
+    def deinit(self):
+        """deinitializes the cursor object."""
+        self._is_deinited()
+        self._scale = None
+        self._display_grp.remove(self._cursor_grp)
+
+    def _is_deinited(self):
+        """checks cursor deinitialization"""
+        if self._scale is None:
+            raise ValueError("Cursor object has been deinitialized and can no longer "
+                             "be used. Create a new cursor object.")
+
     @property
     def scale(self):
         """Returns the cursor's scale amount as an integer."""
@@ -85,6 +103,7 @@ class Cursor:
         """Scales the cursor by scale_value in both directions.
         :param int scale_value: Amount to scale the cursor by.
         """
+        self._is_deinited()
         if scale_value > 0:
             self._scale = scale_value
             self._cursor_grp.scale = scale_value
@@ -99,6 +118,7 @@ class Cursor:
         """Sets the speed of the cursor.
         :param int speed: Cursor movement speed, in pixels.
         """
+        self._is_deinited()
         self._speed = speed
 
     @property
@@ -111,6 +131,7 @@ class Cursor:
         """Sets the x-value of the cursor.
         :param int x_val: cursor x-position, in pixels.
         """
+        self._is_deinited()
         if x_val < 0 and not self._is_hidden:
             self._cursor_grp.x = self._cursor_grp.x
         elif x_val > self._disp_sz[1] and not self._is_hidden:
@@ -128,6 +149,7 @@ class Cursor:
         """Sets the y-value of the cursor.
         :param int y_val: cursor y-position, in pixels.
         """
+        self._is_deinited()
         if y_val < 0 and not self._is_hidden:
             self._cursor_grp.y = self._cursor_grp.y
         elif y_val > self._disp_sz[0] and not self._is_hidden:
@@ -142,6 +164,7 @@ class Cursor:
 
     @hide.setter
     def hide(self, is_hidden):
+        self._is_deinited()
         if is_hidden:
             self._is_hidden = True
             self._display_grp.remove(self._cursor_grp)
@@ -151,6 +174,7 @@ class Cursor:
 
     def generate_cursor(self):
         """Generates a cursor icon"""
+        self._is_deinited()
         self._cursor_grp = displayio.Group(max_size=1, scale=self._scale)
         self._cur_bmp = displayio.Bitmap(20, 20, 3)
         self._cur_palette = displayio.Palette(3)

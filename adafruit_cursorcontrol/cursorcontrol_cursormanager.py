@@ -40,6 +40,9 @@ PYBADGE_BUTTON_RIGHT = const(16)
 # PyBadge & PyGamer
 PYBADGE_BUTTON_A = const(2)
 
+JOY_X_CTR = 32767.5
+JOY_Y_CTR = 32767.5
+
 class CursorManager:
     """Simple interaction user interface interaction for Adafruit_CursorControl.
 
@@ -104,12 +107,39 @@ class CursorManager:
         if pressed & self._pad_btns['btn_a']:
             self._is_clicked = True
 
+
+    def _read_joystick_x(self, samples=3):
+        """Read the X analog joystick on the PyGamer.
+        :param int samples: How many samples to read and average.
+        """
+        reading = 0
+        # pylint: disable=unused-variable
+        if hasattr(board, 'JOYSTICK_X'):
+            for sample in range(0, samples):
+                reading += self._joystick_x.value
+            reading /= samples
+            reading -= JOY_X_CTR
+        return reading
+
+    def _read_joystick_y(self, samples=3):
+        """Read the Y analog joystick on the PyGamer.
+        :param int samples: How many samples to read and average.
+        """
+        reading = 0
+        # pylint: disable=unused-variable
+        if hasattr(board, 'JOYSTICK_Y'):
+            for sample in range(0, samples):
+                reading += self._joystick_y.value
+            reading /= samples
+            reading -= JOY_Y_CTR
+        return reading
+
     def _check_cursor_movement(self, pressed=None):
         """Checks the PyBadge D-Pad or the PyGamer's Joystick for movement.
         :param int pressed: 8-bit number with bits that correspond to buttons
             which have been pressed down since the last call to get_pressed().
         """
-        if self._pad_btns['btn_up']:
+        if hasattr(board, 'BUTTON_CLOCK') and not hasattr(board, 'JOYSTICK_X'):
             if pressed & self._pad_btns['btn_right']:
                 self._cursor.x += self._cursor.speed
             elif pressed & self._pad_btns['btn_left']:
@@ -118,6 +148,16 @@ class CursorManager:
                 self._cursor.y -= self._cursor.speed
             elif pressed & self._pad_btns['btn_down']:
                 self._cursor.y += self._cursor.speed
+        elif hasattr(board, 'JOYSTICK_X'):
+            joy_x = self._read_joystick_x()
+            joy_y = self._read_joystick_y()
+            if joy_x > 700:
+                self._cursor.x += self._cursor.speed
+            elif joy_x < -700:
+                self._cursor.x -= self._cursor.speed
+            if joy_y > 700:
+                self._cursor.y += self._cursor.speed
+            elif joy_y < -700:
+                self._cursor.y -= self._cursor.speed
         else:
-            self._cursor.x = self._joystick_x
-            self._cursor.y = self._joystick_y
+            raise AttributeError('Board must have a D-Pad or Joystick for use with CursorManager!')

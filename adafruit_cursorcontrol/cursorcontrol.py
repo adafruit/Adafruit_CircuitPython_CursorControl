@@ -119,7 +119,8 @@ class Cursor:
         :param int speed: Cursor movement speed, in pixels.
         """
         self._is_deinited()
-        self._speed = speed
+        if speed > 0:
+            self._speed = speed
 
     @property
     def x(self):

@@ -1,25 +1,11 @@
+import time
 import board
-from micropython import const
-import digitalio
 import displayio
 from adafruit_bitmap_font import bitmap_font
 from adafruit_button import Button
-from adafruit_cursorcontrol.adafruit_cursorcontrol import Cursor
+from adafruit_cursorcontrol.cursorcontrol import Cursor
+from adafruit_cursorcontrol.cursorcontrol_cursormanager import CursorManager
 from adafruit_display_text import label
-from gamepadshift import GamePadShift
-
-# PyBadge Button Masks
-BUTTON_LEFT = const(128)
-BUTTON_UP = const(64)
-BUTTON_DOWN = const(32)
-BUTTON_RIGHT = const(16)
-BUTTON_A = const(2)
-BUTTON_B = const(1)
-
-# Initialize PyBadge Gamepad
-pad = GamePadShift(digitalio.DigitalInOut(board.BUTTON_CLOCK),
-                   digitalio.DigitalInOut(board.BUTTON_OUT),
-                   digitalio.DigitalInOut(board.BUTTON_LATCH))
 
 # Load the font
 THE_FONT = "/fonts/Arial-12.bdf"
@@ -92,45 +78,19 @@ splash.append(text_scale)
 # initialize the mouse cursor object
 mouse_cursor = Cursor(display, display_group=splash)
 
+# initialize the cursormanager
+cursor = CursorManager(mouse_cursor)
+
 # show displayio group
 display.show(splash)
 
-def check_dpad(d_pad_buttons):
-    """Checks the directional pad for button presses."""
-    if d_pad_buttons & BUTTON_RIGHT:
-        mouse_cursor.x += mouse_cursor.speed
-    elif d_pad_buttons & BUTTON_LEFT:
-        mouse_cursor.x -= mouse_cursor.speed
-    if d_pad_buttons & BUTTON_DOWN:
-        mouse_cursor.y += mouse_cursor.speed
-    elif d_pad_buttons & BUTTON_UP:
-        mouse_cursor.y -= mouse_cursor.speed
-
-is_pressed = False
+prev_btn = None
 while True:
-    display.wait_for_frame()
-    text_speed.text = 'Speed: {0}px'.format(mouse_cursor.speed)
-    text_scale.text = 'Scale: {0}px'.format(mouse_cursor.scale)
-    pressed = pad.get_pressed()
-    check_dpad(pressed)
-    if is_pressed:
-        if not pressed & (BUTTON_A | BUTTON_B):
-            # buttons de-pressed
-            is_pressed = False
-            for i, b in enumerate(buttons):
-                b.selected=False
-        # otherwise, continue holding
-        continue
-    if pressed & BUTTON_B:
-        is_pressed = True
-        if mouse_cursor.hide:
-            mouse_cursor.hide = False
-        else:
-            mouse_cursor.hide = True
-    if pressed & BUTTON_A:
-        is_pressed = True
+    cursor.update()
+    if cursor.is_clicked is True:
         for i, b in enumerate(buttons):
             if b.contains((mouse_cursor.x, mouse_cursor.y)):
+                b.selected=True
                 print("Button %d pressed"%i)
                 if i == 0: # Increase the cursor speed
                     mouse_cursor.speed += 1
@@ -140,4 +100,9 @@ while True:
                     mouse_cursor.scale += 1
                 elif i == 3: # Decrease the cursor scale
                     mouse_cursor.scale -= 1
-                b.selected=True
+                prev_btn = b
+    elif prev_btn is not None:
+        prev_btn.selected = False
+    text_speed.text = 'Speed: {0}px'.format(mouse_cursor.speed)
+    text_scale.text = 'Scale: {0}px'.format(mouse_cursor.scale)
+    time.sleep(0.01)

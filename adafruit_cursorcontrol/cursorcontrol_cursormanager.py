@@ -102,11 +102,9 @@ class CursorManager:
         pressed = self._pad.get_pressed()
         self._check_cursor_movement(pressed)
         if self._is_clicked:
-            if not pressed & (self._pad_btns['btn_a']):
-                self._is_clicked = False
-        if pressed & self._pad_btns['btn_a']:
+            self._is_clicked = False
+        elif pressed & self._pad_btns['btn_a']:
             self._is_clicked = True
-
 
     def _read_joystick_x(self, samples=3):
         """Read the X analog joystick on the PyGamer.

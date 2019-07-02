@@ -165,6 +165,9 @@ class CursorManager(object):
 
 class DebouncedCursorManager(CursorManager):
     """Simple interaction user interface interaction for Adafruit_CursorControl.
+    This subclass provide a debounced version on the A button and provides queries for when
+    the button is just pressed, and just released, as well it's current state. "Just" in this
+    context means "since the previous call to update."
 
     :param adafruit_cursorcontrol cursor: The cursor object we are using.
     """

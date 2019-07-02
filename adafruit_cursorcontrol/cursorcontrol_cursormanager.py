@@ -44,7 +44,7 @@ PYBADGE_BUTTON_A = const(2)
 JOY_X_CTR = 32767.5
 JOY_Y_CTR = 32767.5
 
-class CursorManager:
+class CursorManager(object):
     """Simple interaction user interface interaction for Adafruit_CursorControl.
 
     :param adafruit_cursorcontrol cursor: The cursor object we are using.
@@ -171,7 +171,8 @@ class DebouncedCursorManager(CursorManager):
     def __init__(self, cursor, debounce_interval=0.01):
         CursorManager.__init__(self, cursor)
         self._pressed = 0
-        self._debouncer = Debouncer(lambda: bool(self._pressed & self._pad_btns['btn_a']), interval=debounce_interval)
+        self._debouncer = Debouncer(lambda: bool(self._pressed & self._pad_btns['btn_a']),
+                                    interval=debounce_interval)
 
     @property
     def is_clicked(self):

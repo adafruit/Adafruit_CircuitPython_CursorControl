@@ -31,6 +31,7 @@ import digitalio
 from micropython import const
 import analogio
 from gamepadshift import GamePadShift
+from adafruit_debouncer import Debouncer
 
 # PyBadge
 PYBADGE_BUTTON_LEFT = const(128)
@@ -50,8 +51,9 @@ class CursorManager:
     """
     def __init__(self, cursor):
         self._cursor = cursor
-        self._is_clicked = False
+        self._pressed = 0
         self._init_hardware()
+        self._debouncer = Debouncer(lambda: bool(self._pressed & self._pad_btns['btn_a']))
 
     def __enter__(self):
         return self
@@ -90,21 +92,34 @@ class CursorManager:
                                  digitalio.DigitalInOut(board.BUTTON_OUT),
                                  digitalio.DigitalInOut(board.BUTTON_LATCH))
 
+
     @property
     def is_clicked(self):
         """Returns True if the cursor button was pressed
         during previous call to update()
         """
-        return self._is_clicked
+        return self._debouncer.rose
+    pressed = is_clicked
+
+    @property
+    def released(self):
+        """Returns True if the cursor button was released
+        during previous call to update()
+        """
+        return self._debouncer.fell
+
+    @property
+    def held(self):
+        """Returns True if the cursor button is currently being held
+        """
+        return self._debouncer.value
+
 
     def update(self):
         """Updates the cursor object."""
-        pressed = self._pad.get_pressed()
-        self._check_cursor_movement(pressed)
-        if self._is_clicked:
-            self._is_clicked = False
-        elif pressed & self._pad_btns['btn_a']:
-            self._is_clicked = True
+        self._pressed = self._pad.get_pressed()
+        self._check_cursor_movement(self._pressed)
+        self._debouncer.update()
 
     def _read_joystick_x(self, samples=3):
         """Read the X analog joystick on the PyGamer.

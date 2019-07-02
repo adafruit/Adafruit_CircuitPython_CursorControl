@@ -169,7 +169,7 @@ class DebouncedCursorManager(CursorManager):
     :param adafruit_cursorcontrol cursor: The cursor object we are using.
     """
     def __init__(self, cursor, debounce_interval=0.01):
-        super().__init__(self, cursor)
+        CursorManager.__init__(self, cursor)
         self._pressed = 0
         self._debouncer = Debouncer(lambda: bool(self._pressed & self._pad_btns['btn_a']), interval=debounce_interval)
 

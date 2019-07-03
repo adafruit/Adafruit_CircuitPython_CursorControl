@@ -162,12 +162,12 @@ class Cursor(object):
             self._cursor_grp.y = y_val
 
     @property
-    def hide(self):
+    def hidden(self):
         """Returns True if the cursor is hidden or visible on the display."""
         return self._is_hidden
 
-    @hide.setter
-    def hide(self, is_hidden):
+    @hidden.setter
+    def hidden(self, is_hidden):
         self._is_deinited()
         if is_hidden:
             self._is_hidden = True
@@ -175,6 +175,14 @@ class Cursor(object):
         else:
             self._is_hidden = False
             self._display_grp.append(self._cursor_grp)
+
+    def hide(self):
+        """Hide the cursor."""
+        self.hidden = True
+
+    def show(self):
+        """Show the cursor."""
+        self.hidden = False
 
     #pylint:disable=no-self-use
     def _default_cursor_bitmap(self):

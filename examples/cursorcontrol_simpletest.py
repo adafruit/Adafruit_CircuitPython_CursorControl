@@ -22,8 +22,8 @@ display.show(splash)
 while True:
     cursor.update()
     if cursor.is_clicked:
-        if mouse_cursor.hide:
-            mouse_cursor.hide = False
+        if mouse_cursor.hidden:
+            mouse_cursor.show()
         else:
-            mouse_cursor.hide = True
+            mouse_cursor.hide()
     time.sleep(0.01)

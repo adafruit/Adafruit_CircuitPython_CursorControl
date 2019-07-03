@@ -31,6 +31,7 @@ import digitalio
 from micropython import const
 import analogio
 from gamepadshift import GamePadShift
+from adafruit_debouncer import Debouncer
 
 # PyBadge
 PYBADGE_BUTTON_LEFT = const(128)
@@ -43,7 +44,7 @@ PYBADGE_BUTTON_A = const(2)
 JOY_X_CTR = 32767.5
 JOY_Y_CTR = 32767.5
 
-class CursorManager:
+class CursorManager(object):
     """Simple interaction user interface interaction for Adafruit_CursorControl.
 
     :param adafruit_cursorcontrol cursor: The cursor object we are using.
@@ -89,6 +90,7 @@ class CursorManager:
         self._pad = GamePadShift(digitalio.DigitalInOut(board.BUTTON_CLOCK),
                                  digitalio.DigitalInOut(board.BUTTON_OUT),
                                  digitalio.DigitalInOut(board.BUTTON_LATCH))
+
 
     @property
     def is_clicked(self):
@@ -159,3 +161,46 @@ class CursorManager:
                 self._cursor.y -= self._cursor.speed
         else:
             raise AttributeError('Board must have a D-Pad or Joystick for use with CursorManager!')
+
+
+class DebouncedCursorManager(CursorManager):
+    """Simple interaction user interface interaction for Adafruit_CursorControl.
+    This subclass provide a debounced version on the A button and provides queries for when
+    the button is just pressed, and just released, as well it's current state. "Just" in this
+    context means "since the previous call to update."
+
+    :param adafruit_cursorcontrol cursor: The cursor object we are using.
+    """
+    def __init__(self, cursor, debounce_interval=0.01):
+        CursorManager.__init__(self, cursor)
+        self._pressed = 0
+        self._debouncer = Debouncer(lambda: bool(self._pressed & self._pad_btns['btn_a']),
+                                    interval=debounce_interval)
+
+    @property
+    def is_clicked(self):
+        """Returns True if the cursor button was pressed
+        during previous call to update()
+        """
+        return self._debouncer.rose
+    pressed = is_clicked
+
+    @property
+    def released(self):
+        """Returns True if the cursor button was released
+        during previous call to update()
+        """
+        return self._debouncer.fell
+
+    @property
+    def held(self):
+        """Returns True if the cursor button is currently being held
+        """
+        return self._debouncer.value
+
+
+    def update(self):
+        """Updates the cursor object."""
+        self._pressed = self._pad.get_pressed()
+        self._check_cursor_movement(self._pressed)
+        self._debouncer.update()

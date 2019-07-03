@@ -66,14 +66,16 @@ class Cursor:
         mouse_cursor = Cursor(display, display_group=splash)
     """
     # pylint: disable=too-many-arguments
-    def __init__(self, display=None, display_group=None, is_hidden=False, cursor_speed=5, scale=1):
+    def __init__(self, display=None, display_group=None, bmp=None, is_hidden=False, cursor_speed=5, scale=1):
         self._display = display
         self._scale = scale
         self._speed = cursor_speed
         self._is_hidden = is_hidden
         self._display_grp = display_group
         self._disp_sz = display.height - 1, display.width - 1
-        self.generate_cursor()
+        if bmp is None:
+            bmp = self._default_cursor_bitmap()
+        self.generate_cursor(bmp)
 
     def __enter__(self):
         return self
@@ -173,34 +175,37 @@ class Cursor:
             self._is_hidden = False
             self._display_grp.append(self._cursor_grp)
 
-    def generate_cursor(self):
+    def _default_cursor_bitmap(self):
+        bmp = displayio.Bitmap(20, 20, 3)
+        # left edge, outline
+        for i in range(0, bmp.height):
+            bmp[0, i] = 2
+        # right diag outline, inside fill
+        for j in range(1, 15):
+            bmp[j, j] = 2
+            for i in range(j+1, bmp.height - j):
+                bmp[j, i] = 1
+        # bottom diag., outline
+        for i in range(1, 5):
+            bmp[i, bmp.height-i] = 2
+        # bottom flat line, right side fill
+        for i in range(5, 15):
+            bmp[i, 15] = 2
+            bmp[i-1, 14] = 1
+            bmp[i-2, 13] = 1
+            bmp[i-3, 12] = 1
+            bmp[i-4, 11] = 1
+        return bmp
+
+    def generate_cursor(self, bmp):
         """Generates a cursor icon"""
         self._is_deinited()
         self._cursor_grp = displayio.Group(max_size=1, scale=self._scale)
-        self._cur_bmp = displayio.Bitmap(20, 20, 3)
         self._cur_palette = displayio.Palette(3)
         self._cur_palette.make_transparent(0)
         self._cur_palette[1] = 0xFFFFFF
         self._cur_palette[2] = 0x0000
-        # left edge, outline
-        for i in range(0, self._cur_bmp.height):
-            self._cur_bmp[0, i] = 2
-        # right diag outline, inside fill
-        for j in range(1, 15):
-            self._cur_bmp[j, j] = 2
-            for i in range(j+1, self._cur_bmp.height - j):
-                self._cur_bmp[j, i] = 1
-        # bottom diag., outline
-        for i in range(1, 5):
-            self._cur_bmp[i, self._cur_bmp.height-i] = 2
-        # bottom flat line, right side fill
-        for i in range(5, 15):
-            self._cur_bmp[i, 15] = 2
-            self._cur_bmp[i-1, 14] = 1
-            self._cur_bmp[i-2, 13] = 1
-            self._cur_bmp[i-3, 12] = 1
-            self._cur_bmp[i-4, 11] = 1
-        self._cur_sprite = displayio.TileGrid(self._cur_bmp,
+        self._cur_sprite = displayio.TileGrid(bmp,
                                               pixel_shader=self._cur_palette)
         self._cursor_grp.append(self._cur_sprite)
         self._display_grp.append(self._cursor_grp)

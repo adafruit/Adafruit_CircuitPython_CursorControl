@@ -42,7 +42,7 @@ import displayio
 __version__ = "0.0.0-auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_Cursor.git"
 
-class Cursor:
+class Cursor(object):
     """Mouse cursor interaction for CircuitPython.
 
     :param ~displayio.Display display: CircuitPython display object.
@@ -65,7 +65,7 @@ class Cursor:
         # initialize the mouse cursor object
         mouse_cursor = Cursor(display, display_group=splash)
     """
-    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments,line-too-long
     def __init__(self, display=None, display_group=None, bmp=None, is_hidden=False, cursor_speed=5, scale=1):
         self._display = display
         self._scale = scale
@@ -76,6 +76,7 @@ class Cursor:
         if bmp is None:
             bmp = self._default_cursor_bitmap()
         self.generate_cursor(bmp)
+    # pylint: enable=too-many-arguments,line-too-long
 
     def __enter__(self):
         return self
@@ -175,6 +176,7 @@ class Cursor:
             self._is_hidden = False
             self._display_grp.append(self._cursor_grp)
 
+    #pylint:disable=no-self-use
     def _default_cursor_bitmap(self):
         bmp = displayio.Bitmap(20, 20, 3)
         # left edge, outline
@@ -196,6 +198,7 @@ class Cursor:
             bmp[i-3, 12] = 1
             bmp[i-4, 11] = 1
         return bmp
+    #pylint:enable=no-self-use
 
     def generate_cursor(self, bmp):
         """Generates a cursor icon"""

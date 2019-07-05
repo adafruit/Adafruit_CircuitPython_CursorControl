@@ -73,8 +73,11 @@ class Cursor(object):
         self._is_hidden = is_hidden
         self._display_grp = display_group
         self._disp_sz = display.height - 1, display.width - 1
+        self._cur_sprite = None
         if bmp is None:
-            bmp = self._default_cursor_bitmap()
+            self._cursor_bitmap = self._default_cursor_bitmap()
+        else:
+            self._cursor_bitmap = bmp
         self.generate_cursor(bmp)
     # pylint: enable=too-many-arguments,line-too-long
 
@@ -207,6 +210,23 @@ class Cursor(object):
             bmp[i-4, 11] = 1
         return bmp
     #pylint:enable=no-self-use
+
+    @property
+    def cursor_bitmap(self):
+        """Return the cursor bitmap."""
+        return self._cursor_bitmap
+
+    @cursor_bitmap.setter
+    def cursor_bitmap(self, bmp):
+        """Set a new cursor bitmap.
+
+        :param bmp: A Bitmap to use for the cursor
+        """
+        self._cursor_bitmap = bmp
+        self._cursor_grp.remove(self._cur_sprite)
+        self._cur_sprite = displayio.TileGrid(bmp,
+                                              pixel_shader=self._cur_palette)
+        self._cursor_grp.append(self._cur_sprite)
 
     def generate_cursor(self, bmp):
         """Generates a cursor icon"""

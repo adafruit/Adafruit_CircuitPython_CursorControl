@@ -11,7 +11,15 @@ display = board.DISPLAY
 splash = displayio.Group(max_size=5)
 
 # initialize the mouse cursor object
-mouse_cursor = Cursor(display, display_group=splash)
+bmp = displayio.Bitmap(20, 20, 3)
+for i in range(0, bmp.height):
+    bmp[0, i] = 1
+    bmp[bmp.width - 1, i] = 1
+for i in range(0, bmp.width):
+    bmp[i, 0] = 1
+    bmp[i, bmp.height - 1] = 1
+
+mouse_cursor = Cursor(display, display_group=splash, bmp=bmp)
 
 # initialize the cursormanager
 cursor = CursorManager(mouse_cursor)

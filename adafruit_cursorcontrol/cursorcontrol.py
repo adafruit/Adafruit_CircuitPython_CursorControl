@@ -78,7 +78,7 @@ class Cursor(object):
             self._cursor_bitmap = self._default_cursor_bitmap()
         else:
             self._cursor_bitmap = bmp
-        self.generate_cursor(bmp)
+        self.generate_cursor(self._cursor_bitmap)
     # pylint: enable=too-many-arguments,line-too-long
 
     def __enter__(self):

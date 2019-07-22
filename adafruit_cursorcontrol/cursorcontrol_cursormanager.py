@@ -41,10 +41,6 @@ PYBADGE_BUTTON_RIGHT = const(16)
 # PyBadge & PyGamer
 PYBADGE_BUTTON_A = const(2)
 
-JOY_X_CTR = 32767.5
-JOY_Y_CTR = 32767.5
-
-
 class CursorManager(object):
     """Simple interaction user interface interaction for Adafruit_CursorControl.
 
@@ -55,8 +51,8 @@ class CursorManager(object):
         self._cursor = cursor
         self._is_clicked = False
         self._init_hardware()
-        self._center_x = self._read_joystick_x(samples=10)
-        self._center_y = self._read_joystick_y(samples=10)
+        self._center_x = self._joystick_x.value
+        self._center_y = self._joystick_y.value
 
     def __enter__(self):
         return self
@@ -129,7 +125,6 @@ class CursorManager(object):
             for sample in range(0, samples):
                 reading += self._joystick_x.value
             reading /= samples
-            reading -= JOY_X_CTR
         return reading
 
     def _read_joystick_y(self, samples=3):
@@ -142,7 +137,6 @@ class CursorManager(object):
             for sample in range(0, samples):
                 reading += self._joystick_y.value
             reading /= samples
-            reading -= JOY_Y_CTR
         return reading
 
     def _check_cursor_movement(self, pressed=None):
@@ -162,13 +156,13 @@ class CursorManager(object):
         elif hasattr(board, "JOYSTICK_X"):
             joy_x = self._read_joystick_x()
             joy_y = self._read_joystick_y()
-            if joy_x > self._center_x + 100:
+            if joy_x > self._center_x + 1000:
                 self._cursor.x += self._cursor.speed
-            elif joy_x < self._center_x - 100:
+            elif joy_x < self._center_x - 1000:
                 self._cursor.x -= self._cursor.speed
-            if joy_y > self._center_y + 100:
+            if joy_y > self._center_y + 1000:
                 self._cursor.y += self._cursor.speed
-            elif joy_y < self._center_y - 100:
+            elif joy_y < self._center_y - 1000:
                 self._cursor.y -= self._cursor.speed
         else:
             raise AttributeError(

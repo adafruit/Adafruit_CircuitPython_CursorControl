@@ -41,18 +41,18 @@ PYBADGE_BUTTON_RIGHT = const(16)
 # PyBadge & PyGamer
 PYBADGE_BUTTON_A = const(2)
 
-JOY_X_CTR = 32767.5
-JOY_Y_CTR = 32767.5
-
 class CursorManager(object):
     """Simple interaction user interface interaction for Adafruit_CursorControl.
 
     :param adafruit_cursorcontrol cursor: The cursor object we are using.
     """
+
     def __init__(self, cursor):
         self._cursor = cursor
         self._is_clicked = False
         self._init_hardware()
+        self._center_x = self._joystick_x.value
+        self._center_y = self._joystick_y.value
 
     def __enter__(self):
         return self
@@ -70,27 +70,34 @@ class CursorManager(object):
     def _is_deinited(self):
         """Checks if CursorManager object has been deinitd."""
         if self._cursor is None:
-            raise ValueError("CursorManager object has been deinitialized and can no longer "
-                             "be used. Create a new CursorManager object.")
+            raise ValueError(
+                "CursorManager object has been deinitialized and can no longer "
+                "be used. Create a new CursorManager object."
+            )
 
     def _init_hardware(self):
         """Initializes PyBadge or PyGamer hardware."""
-        if hasattr(board, 'BUTTON_CLOCK') and not hasattr(board, 'JOYSTICK_X'):
-            self._pad_btns = {'btn_left' : PYBADGE_BUTTON_LEFT,
-                              'btn_right' : PYBADGE_BUTTON_RIGHT,
-                              'btn_up' : PYBADGE_BUTTON_UP,
-                              'btn_down' : PYBADGE_BUTTON_DOWN,
-                              'btn_a' : PYBADGE_BUTTON_A}
-        elif hasattr(board, 'JOYSTICK_X'):
+        if hasattr(board, "BUTTON_CLOCK") and not hasattr(board, "JOYSTICK_X"):
+            self._pad_btns = {
+                "btn_left": PYBADGE_BUTTON_LEFT,
+                "btn_right": PYBADGE_BUTTON_RIGHT,
+                "btn_up": PYBADGE_BUTTON_UP,
+                "btn_down": PYBADGE_BUTTON_DOWN,
+                "btn_a": PYBADGE_BUTTON_A,
+            }
+        elif hasattr(board, "JOYSTICK_X"):
             self._joystick_x = analogio.AnalogIn(board.JOYSTICK_X)
             self._joystick_y = analogio.AnalogIn(board.JOYSTICK_Y)
-            self._pad_btns = {'btn_a' : PYBADGE_BUTTON_A}
+            self._pad_btns = {"btn_a": PYBADGE_BUTTON_A}
         else:
-            raise AttributeError('Board must have a D-Pad or Joystick for use with CursorManager!')
-        self._pad = GamePadShift(digitalio.DigitalInOut(board.BUTTON_CLOCK),
-                                 digitalio.DigitalInOut(board.BUTTON_OUT),
-                                 digitalio.DigitalInOut(board.BUTTON_LATCH))
-
+            raise AttributeError(
+                "Board must have a D-Pad or Joystick for use with CursorManager!"
+            )
+        self._pad = GamePadShift(
+            digitalio.DigitalInOut(board.BUTTON_CLOCK),
+            digitalio.DigitalInOut(board.BUTTON_OUT),
+            digitalio.DigitalInOut(board.BUTTON_LATCH),
+        )
 
     @property
     def is_clicked(self):
@@ -105,7 +112,7 @@ class CursorManager(object):
         self._check_cursor_movement(pressed)
         if self._is_clicked:
             self._is_clicked = False
-        elif pressed & self._pad_btns['btn_a']:
+        elif pressed & self._pad_btns["btn_a"]:
             self._is_clicked = True
 
     def _read_joystick_x(self, samples=3):
@@ -114,11 +121,10 @@ class CursorManager(object):
         """
         reading = 0
         # pylint: disable=unused-variable
-        if hasattr(board, 'JOYSTICK_X'):
+        if hasattr(board, "JOYSTICK_X"):
             for sample in range(0, samples):
                 reading += self._joystick_x.value
             reading /= samples
-            reading -= JOY_X_CTR
         return reading
 
     def _read_joystick_y(self, samples=3):
@@ -127,11 +133,10 @@ class CursorManager(object):
         """
         reading = 0
         # pylint: disable=unused-variable
-        if hasattr(board, 'JOYSTICK_Y'):
+        if hasattr(board, "JOYSTICK_Y"):
             for sample in range(0, samples):
                 reading += self._joystick_y.value
             reading /= samples
-            reading -= JOY_Y_CTR
         return reading
 
     def _check_cursor_movement(self, pressed=None):
@@ -139,28 +144,30 @@ class CursorManager(object):
         :param int pressed: 8-bit number with bits that correspond to buttons
             which have been pressed down since the last call to get_pressed().
         """
-        if hasattr(board, 'BUTTON_CLOCK') and not hasattr(board, 'JOYSTICK_X'):
-            if pressed & self._pad_btns['btn_right']:
+        if hasattr(board, "BUTTON_CLOCK") and not hasattr(board, "JOYSTICK_X"):
+            if pressed & self._pad_btns["btn_right"]:
                 self._cursor.x += self._cursor.speed
-            elif pressed & self._pad_btns['btn_left']:
+            elif pressed & self._pad_btns["btn_left"]:
                 self._cursor.x -= self._cursor.speed
-            if pressed & self._pad_btns['btn_up']:
+            if pressed & self._pad_btns["btn_up"]:
                 self._cursor.y -= self._cursor.speed
-            elif pressed & self._pad_btns['btn_down']:
+            elif pressed & self._pad_btns["btn_down"]:
                 self._cursor.y += self._cursor.speed
-        elif hasattr(board, 'JOYSTICK_X'):
+        elif hasattr(board, "JOYSTICK_X"):
             joy_x = self._read_joystick_x()
             joy_y = self._read_joystick_y()
-            if joy_x > 700:
+            if joy_x > self._center_x + 1000:
                 self._cursor.x += self._cursor.speed
-            elif joy_x < -700:
+            elif joy_x < self._center_x - 1000:
                 self._cursor.x -= self._cursor.speed
-            if joy_y > 700:
+            if joy_y > self._center_y + 1000:
                 self._cursor.y += self._cursor.speed
-            elif joy_y < -700:
+            elif joy_y < self._center_y - 1000:
                 self._cursor.y -= self._cursor.speed
         else:
-            raise AttributeError('Board must have a D-Pad or Joystick for use with CursorManager!')
+            raise AttributeError(
+                "Board must have a D-Pad or Joystick for use with CursorManager!"
+            )
 
 
 class DebouncedCursorManager(CursorManager):
@@ -171,11 +178,14 @@ class DebouncedCursorManager(CursorManager):
 
     :param adafruit_cursorcontrol cursor: The cursor object we are using.
     """
+
     def __init__(self, cursor, debounce_interval=0.01):
         CursorManager.__init__(self, cursor)
         self._pressed = 0
-        self._debouncer = Debouncer(lambda: bool(self._pressed & self._pad_btns['btn_a']),
-                                    interval=debounce_interval)
+        self._debouncer = Debouncer(
+            lambda: bool(self._pressed & self._pad_btns["btn_a"]),
+            interval=debounce_interval,
+        )
 
     @property
     def is_clicked(self):
@@ -183,6 +193,7 @@ class DebouncedCursorManager(CursorManager):
         during previous call to update()
         """
         return self._debouncer.rose
+
     pressed = is_clicked
 
     @property
@@ -197,7 +208,6 @@ class DebouncedCursorManager(CursorManager):
         """Returns True if the cursor button is currently being held
         """
         return self._debouncer.value
-
 
     def update(self):
         """Updates the cursor object."""

@@ -53,6 +53,8 @@ class CursorManager(object):
         self._cursor = cursor
         self._is_clicked = False
         self._init_hardware()
+        self._center_x = self._read_joystick_x(samples=10)
+        self._center_y = self._read_joystick_y(samples=10)
 
     def __enter__(self):
         return self
@@ -151,13 +153,13 @@ class CursorManager(object):
         elif hasattr(board, 'JOYSTICK_X'):
             joy_x = self._read_joystick_x()
             joy_y = self._read_joystick_y()
-            if joy_x > 700:
+            if joy_x > self._center_x + 100:
                 self._cursor.x += self._cursor.speed
-            elif joy_x < -700:
+            elif joy_x < self._center_x - 100:
                 self._cursor.x -= self._cursor.speed
-            if joy_y > 700:
+            if joy_y > self._center_y + 100:
                 self._cursor.y += self._cursor.speed
-            elif joy_y < -700:
+            elif joy_y < self._center_y - 100:
                 self._cursor.y -= self._cursor.speed
         else:
             raise AttributeError('Board must have a D-Pad or Joystick for use with CursorManager!')

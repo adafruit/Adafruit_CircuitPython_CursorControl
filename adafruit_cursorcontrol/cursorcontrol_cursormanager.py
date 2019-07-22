@@ -145,11 +145,10 @@ class CursorManager(object):
             reading -= JOY_Y_CTR
         return reading
 
-    def _check_cursor_movement(self, pressed=None, variance = 100):
+    def _check_cursor_movement(self, pressed=None):
         """Checks the PyBadge D-Pad or the PyGamer's Joystick for movement.
         :param int pressed: 8-bit number with bits that correspond to buttons
             which have been pressed down since the last call to get_pressed().
-        :param int variance: Drift amount, defaults to 100. Adjust for lower sensitivity.
         """
         if hasattr(board, "BUTTON_CLOCK") and not hasattr(board, "JOYSTICK_X"):
             if pressed & self._pad_btns["btn_right"]:
@@ -163,13 +162,13 @@ class CursorManager(object):
         elif hasattr(board, "JOYSTICK_X"):
             joy_x = self._read_joystick_x()
             joy_y = self._read_joystick_y()
-            if joy_x > self._center_x + variance:
+            if joy_x > self._center_x + 100:
                 self._cursor.x += self._cursor.speed
-            elif joy_x < self._center_x - variance:
+            elif joy_x < self._center_x - 100:
                 self._cursor.x -= self._cursor.speed
-            if joy_y > self._center_y + variance:
+            if joy_y > self._center_y + 100:
                 self._cursor.y += self._cursor.speed
-            elif joy_y < self._center_y - variance:
+            elif joy_y < self._center_y - 100:
                 self._cursor.y -= self._cursor.speed
         else:
             raise AttributeError(

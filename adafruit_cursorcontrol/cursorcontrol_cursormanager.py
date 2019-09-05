@@ -41,7 +41,7 @@ PYBADGE_BUTTON_RIGHT = const(16)
 # PyBadge & PyGamer
 PYBADGE_BUTTON_A = const(2)
 
-class CursorManager(object):
+class CursorManager():
     """Simple interaction user interface interaction for Adafruit_CursorControl.
 
     :param adafruit_cursorcontrol cursor: The cursor object we are using.

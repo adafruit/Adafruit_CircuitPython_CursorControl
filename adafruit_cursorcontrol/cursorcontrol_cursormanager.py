@@ -51,8 +51,6 @@ class CursorManager(object):
         self._cursor = cursor
         self._is_clicked = False
         self._init_hardware()
-        self._center_x = self._joystick_x.value
-        self._center_y = self._joystick_y.value
 
     def __enter__(self):
         return self
@@ -89,6 +87,9 @@ class CursorManager(object):
             self._joystick_x = analogio.AnalogIn(board.JOYSTICK_X)
             self._joystick_y = analogio.AnalogIn(board.JOYSTICK_Y)
             self._pad_btns = {"btn_a": PYBADGE_BUTTON_A}
+            # Sample the center points of the joystick
+            self._center_x = self._joystick_x.value
+            self._center_y = self._joystick_y.value
         else:
             raise AttributeError(
                 "Board must have a D-Pad or Joystick for use with CursorManager!"

@@ -42,7 +42,7 @@ import displayio
 __version__ = "0.0.0-auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_Cursor.git"
 
-class Cursor(object):
+class Cursor():
     """Mouse cursor interaction for CircuitPython.
 
     :param ~displayio.Display display: CircuitPython display object.

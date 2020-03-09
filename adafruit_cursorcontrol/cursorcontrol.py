@@ -65,8 +65,17 @@ class Cursor():
         # initialize the mouse cursor object
         mouse_cursor = Cursor(display, display_group=splash)
     """
+
     # pylint: disable=too-many-arguments,line-too-long
-    def __init__(self, display=None, display_group=None, bmp=None, is_hidden=False, cursor_speed=5, scale=1):
+    def __init__(
+        self,
+        display=None,
+        display_group=None,
+        bmp=None,
+        is_hidden=False,
+        cursor_speed=5,
+        scale=1,
+    ):
         self._display = display
         self._scale = scale
         self._speed = cursor_speed
@@ -79,6 +88,7 @@ class Cursor():
         else:
             self._cursor_bitmap = bmp
         self.generate_cursor(self._cursor_bitmap)
+
     # pylint: enable=too-many-arguments,line-too-long
 
     def __enter__(self):
@@ -96,8 +106,10 @@ class Cursor():
     def _is_deinited(self):
         """checks cursor deinitialization"""
         if self._scale is None:
-            raise ValueError("Cursor object has been deinitialized and can no longer "
-                             "be used. Create a new cursor object.")
+            raise ValueError(
+                "Cursor object has been deinitialized and can no longer "
+                "be used. Create a new cursor object."
+            )
 
     @property
     def scale(self):
@@ -187,7 +199,7 @@ class Cursor():
         """Show the cursor."""
         self.hidden = False
 
-    #pylint:disable=no-self-use
+    # pylint:disable=no-self-use
     def _default_cursor_bitmap(self):
         bmp = displayio.Bitmap(20, 20, 3)
         # left edge, outline
@@ -196,20 +208,21 @@ class Cursor():
         # right diag outline, inside fill
         for j in range(1, 15):
             bmp[j, j] = 2
-            for i in range(j+1, bmp.height - j):
+            for i in range(j + 1, bmp.height - j):
                 bmp[j, i] = 1
         # bottom diag., outline
         for i in range(1, 5):
-            bmp[i, bmp.height-i] = 2
+            bmp[i, bmp.height - i] = 2
         # bottom flat line, right side fill
         for i in range(5, 15):
             bmp[i, 15] = 2
-            bmp[i-1, 14] = 1
-            bmp[i-2, 13] = 1
-            bmp[i-3, 12] = 1
-            bmp[i-4, 11] = 1
+            bmp[i - 1, 14] = 1
+            bmp[i - 2, 13] = 1
+            bmp[i - 3, 12] = 1
+            bmp[i - 4, 11] = 1
         return bmp
-    #pylint:enable=no-self-use
+
+    # pylint:enable=no-self-use
 
     @property
     def cursor_bitmap(self):
@@ -224,8 +237,7 @@ class Cursor():
         """
         self._cursor_bitmap = bmp
         self._cursor_grp.remove(self._cur_sprite)
-        self._cur_sprite = displayio.TileGrid(bmp,
-                                              pixel_shader=self._cur_palette)
+        self._cur_sprite = displayio.TileGrid(bmp, pixel_shader=self._cur_palette)
         self._cursor_grp.append(self._cur_sprite)
 
     def generate_cursor(self, bmp):
@@ -236,7 +248,6 @@ class Cursor():
         self._cur_palette.make_transparent(0)
         self._cur_palette[1] = 0xFFFFFF
         self._cur_palette[2] = 0x0000
-        self._cur_sprite = displayio.TileGrid(bmp,
-                                              pixel_shader=self._cur_palette)
+        self._cur_sprite = displayio.TileGrid(bmp, pixel_shader=self._cur_palette)
         self._cursor_grp.append(self._cur_sprite)
         self._display_grp.append(self._cursor_grp)

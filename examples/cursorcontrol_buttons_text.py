@@ -1,11 +1,14 @@
+# SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
+# SPDX-License-Identifier: MIT
+
 import time
 import board
 import displayio
 from adafruit_button import Button
-from adafruit_cursorcontrol.cursorcontrol import Cursor
-from adafruit_cursorcontrol.cursorcontrol_cursormanager import CursorManager
 from adafruit_display_text import label
 import terminalio
+from adafruit_cursorcontrol.cursorcontrol import Cursor
+from adafruit_cursorcontrol.cursorcontrol_cursormanager import CursorManager
 
 # Create the display
 display = board.DISPLAY

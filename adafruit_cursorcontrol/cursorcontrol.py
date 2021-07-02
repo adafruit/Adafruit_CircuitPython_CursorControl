@@ -44,7 +44,7 @@ class Cursor:
         display = board.DISPLAY
 
         # Create the display context
-        splash = displayio.Group(max_size=22)
+        splash = displayio.Group()
 
         # initialize the mouse cursor object
         mouse_cursor = Cursor(display, display_group=splash)
@@ -227,7 +227,7 @@ class Cursor:
     def generate_cursor(self, bmp):
         """Generates a cursor icon"""
         self._is_deinited()
-        self._cursor_grp = displayio.Group(max_size=1, scale=self._scale)
+        self._cursor_grp = displayio.Group(scale=self._scale)
         self._cur_palette = displayio.Palette(3)
         self._cur_palette.make_transparent(0)
         self._cur_palette[1] = 0xFFFFFF

@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 """
-`adafruit_cursorcontrol_cursormanager`
+`adafruit_cursorcontrol.cursorcontrol_cursormanager`
 ================================================================================
 Simple interaction user interface interaction for Adafruit_CursorControl.
 * Author(s): Brent Rubell

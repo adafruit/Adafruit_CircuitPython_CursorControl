@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 """
-`adafruit_cursorcontrol`
+`adafruit_cursorcontrol.cursorcontrol`
 ================================================================================
 
 Mouse cursor for interaction with CircuitPython UI elements.
@@ -23,7 +23,7 @@ Implementation Notes
 import displayio
 
 __version__ = "0.0.0-auto.0"
-__repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_Cursor.git"
+__repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_CursorControl.git"
 
 
 class Cursor:

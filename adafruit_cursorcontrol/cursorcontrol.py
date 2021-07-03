@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 """
-`adafruit_cursorcontrol`
+`adafruit_cursorcontrol.cursorcontrol`
 ================================================================================
 
 Mouse cursor for interaction with CircuitPython UI elements.
@@ -23,7 +23,7 @@ Implementation Notes
 import displayio
 
 __version__ = "0.0.0-auto.0"
-__repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_Cursor.git"
+__repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_CursorControl.git"
 
 
 class Cursor:
@@ -44,7 +44,7 @@ class Cursor:
         display = board.DISPLAY
 
         # Create the display context
-        splash = displayio.Group(max_size=22)
+        splash = displayio.Group()
 
         # initialize the mouse cursor object
         mouse_cursor = Cursor(display, display_group=splash)
@@ -227,7 +227,7 @@ class Cursor:
     def generate_cursor(self, bmp):
         """Generates a cursor icon"""
         self._is_deinited()
-        self._cursor_grp = displayio.Group(max_size=1, scale=self._scale)
+        self._cursor_grp = displayio.Group(scale=self._scale)
         self._cur_palette = displayio.Palette(3)
         self._cur_palette.make_transparent(0)
         self._cur_palette[1] = 0xFFFFFF

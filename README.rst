@@ -1,7 +1,7 @@
 Introduction
 ============
 
-.. image:: https://readthedocs.org/projects/adafruit-circuitpython-cursorcontrol/badge/?version=latest
+.. image:: https://readthedocs.org/projects/cursorcontrol/badge/?version=latest
     :target: https://circuitpython.readthedocs.io/projects/cursorcontrol/en/latest/
     :alt: Documentation Status
 

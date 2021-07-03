@@ -14,7 +14,7 @@ from adafruit_cursorcontrol.cursorcontrol_cursormanager import CursorManager
 display = board.DISPLAY
 
 # Create the display context
-splash = displayio.Group(max_size=22)
+splash = displayio.Group()
 
 # Use the built-in system font
 font = terminalio.FONT

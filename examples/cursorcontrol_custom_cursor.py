@@ -11,7 +11,7 @@ from adafruit_cursorcontrol.cursorcontrol_cursormanager import CursorManager
 display = board.DISPLAY
 
 # Create the display context
-splash = displayio.Group(max_size=5)
+splash = displayio.Group()
 
 # initialize the mouse cursor object
 bmp = displayio.Bitmap(20, 20, 3)

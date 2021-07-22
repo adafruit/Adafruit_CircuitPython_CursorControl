@@ -102,14 +102,10 @@ text_label = label.Label(
 )
 splash.append(text_label)
 
-text_speed = label.Label(
-    font, max_glyphs=15, color=0x00FF00, x=LBL_TEXT[0], y=LBL_TEXT[1]
-)
+text_speed = label.Label(font, color=0x00FF00, x=LBL_TEXT[0], y=LBL_TEXT[1])
 splash.append(text_speed)
 
-text_scale = label.Label(
-    font, max_glyphs=15, color=0x00FF00, x=LBL_TEXT[0], y=LBL_TEXT[1] + 20
-)
+text_scale = label.Label(font, color=0x00FF00, x=LBL_TEXT[0], y=LBL_TEXT[1] + 20)
 splash.append(text_scale)
 
 # initialize the mouse cursor object

@@ -55,6 +55,11 @@ Usage Example
 
 See examples in examples/ folder.
 
+Documentation
+=============
+
+API documentation for this library can be found on `Read the Docs <https://circuitpython.readthedocs.io/projects/cursorcontrol/en/latest/>`_.
+
 Contributing
 ============
 

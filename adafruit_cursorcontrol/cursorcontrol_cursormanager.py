@@ -15,7 +15,7 @@ from keypad import ShiftRegisterKeys
 from adafruit_debouncer import Debouncer
 
 __version__ = "0.0.0-auto.0"
-__repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_BLE_Eddystone.git"
+__repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_CursorControl.git"
 
 
 # PyBadge

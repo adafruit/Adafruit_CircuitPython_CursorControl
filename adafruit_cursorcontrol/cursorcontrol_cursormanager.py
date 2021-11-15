@@ -36,6 +36,7 @@ class CursorManager:
     def __init__(self, cursor):
         self._cursor = cursor
         self._is_clicked = False
+        self._pad_states = 0
         self._init_hardware()
 
     def __enter__(self):

@@ -14,6 +14,9 @@ import analogio
 from keypad import ShiftRegisterKeys
 from adafruit_debouncer import Debouncer
 
+__version__ = "0.0.0-auto.0"
+__repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_BLE_Eddystone.git"
+
 
 # PyBadge
 PYBADGE_BUTTON_LEFT = const(7)

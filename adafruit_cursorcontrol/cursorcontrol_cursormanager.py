@@ -101,7 +101,7 @@ class CursorManager:
         """Updates the cursor object."""
         event = self._pad.events.get()
         self._store_button_states(event)
-        self._check_cursor_movement(event)
+        self._check_cursor_movement()
         if self._is_clicked:
             self._is_clicked = False
         elif self._pad_states & (1 << self._pad_btns["btn_a"]):

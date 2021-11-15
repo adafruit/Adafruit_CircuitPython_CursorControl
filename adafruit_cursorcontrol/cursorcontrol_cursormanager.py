@@ -83,11 +83,11 @@ class CursorManager:
                 "Board must have a D-Pad or Joystick for use with CursorManager!"
             )
         self._pad = ShiftRegisterKeys(
-            clock = board.BUTTON_CLOCK,
-            data = board.BUTTON_OUT,
-            latch = board.BUTTON_LATCH,
+            clock=board.BUTTON_CLOCK,
+            data=board.BUTTON_OUT,
+            latch=board.BUTTON_LATCH,
             key_count=8,
-            value_when_pressed=True
+            value_when_pressed=True,
         )
 
     @property
@@ -134,12 +134,12 @@ class CursorManager:
     def _store_button_states(self, event):
         """Stores the state of the PyBadge's D-Pad or the PyGamer's Joystick
         into a byte
-        
+
         :param Event event: The latest button press transition event detected.
         """
         if event:
             bit_index = event.key_number
-            current_state = (self._pad_states >> bit_index)
+            current_state = self._pad_states >> bit_index
             if current_state != event.pressed:
                 self._pad_states = (1 << bit_index) ^ self._pad_states
 

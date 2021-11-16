@@ -115,7 +115,7 @@ class CursorManager:
         reading = 0
         # pylint: disable=unused-variable
         if hasattr(board, "JOYSTICK_X"):
-            for sample in range(0, samples):
+            for _ in range(0, samples):
                 reading += self._joystick_x.value
             reading /= samples
         return reading

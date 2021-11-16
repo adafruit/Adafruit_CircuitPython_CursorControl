@@ -37,6 +37,7 @@ class CursorManager:
         self._cursor = cursor
         self._is_clicked = False
         self._pad_states = 0
+        self._event = None
         self._init_hardware()
 
     def __enter__(self):
@@ -99,8 +100,8 @@ class CursorManager:
 
     def update(self):
         """Updates the cursor object."""
-        event = self._pad.events.get()
-        self._store_button_states(event)
+        if self._pad.events.get_into(self._event):
+            self._store_button_states()
         self._check_cursor_movement()
         if self._is_clicked:
             self._is_clicked = False
@@ -131,17 +132,16 @@ class CursorManager:
             reading /= samples
         return reading
 
-    def _store_button_states(self, event):
+    def _store_button_states(self):
         """Stores the state of the PyBadge's D-Pad or the PyGamer's Joystick
         into a byte
 
         :param Event event: The latest button press transition event detected.
         """
-        if event:
-            bit_index = event.key_number
-            current_state = self._pad_states >> bit_index
-            if current_state != event.pressed:
-                self._pad_states = (1 << bit_index) ^ self._pad_states
+        bit_index = self._event.key_number
+        current_state = (self._pad_states >> bit_index) & 1
+        if current_state != self._event.pressed:
+            self._pad_states = (1 << bit_index) ^ self._pad_states
 
     def _check_cursor_movement(self):
         """Checks the PyBadge D-Pad or the PyGamer's Joystick for movement."""
@@ -211,7 +211,7 @@ class DebouncedCursorManager(CursorManager):
 
     def update(self):
         """Updates the cursor object."""
-        event = self._pad.events.get()
-        self._store_button_states(event)
+        if self._pad.events.get_into(self._event):
+            self._store_button_states()
         self._check_cursor_movement()
         self._debouncer.update()

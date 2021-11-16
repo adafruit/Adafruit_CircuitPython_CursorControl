@@ -52,6 +52,7 @@ class CursorManager:
         self._pad.deinit()
         self._cursor.deinit()
         self._cursor = None
+        self._event = None
 
     def _is_deinited(self):
         """Checks if CursorManager object has been deinitd."""

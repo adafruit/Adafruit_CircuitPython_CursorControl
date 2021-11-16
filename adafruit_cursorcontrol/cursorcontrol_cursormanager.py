@@ -11,7 +11,7 @@ Simple interaction user interface interaction for Adafruit_CursorControl.
 import board
 from micropython import const
 import analogio
-from keypad import ShiftRegisterKeys
+from keypad import ShiftRegisterKeys, Event
 from adafruit_debouncer import Debouncer
 
 __version__ = "0.0.0-auto.0"
@@ -37,7 +37,7 @@ class CursorManager:
         self._cursor = cursor
         self._is_clicked = False
         self._pad_states = 0
-        self._event = None
+        self._event = Event()
         self._init_hardware()
 
     def __enter__(self):

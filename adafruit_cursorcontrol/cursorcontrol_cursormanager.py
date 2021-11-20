@@ -9,19 +9,22 @@ Simple interaction user interface interaction for Adafruit_CursorControl.
 * Author(s): Brent Rubell
 """
 import board
-import digitalio
 from micropython import const
 import analogio
-from gamepadshift import GamePadShift
+from keypad import ShiftRegisterKeys, Event
 from adafruit_debouncer import Debouncer
 
+__version__ = "0.0.0-auto.0"
+__repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_CursorControl.git"
+
+
 # PyBadge
-PYBADGE_BUTTON_LEFT = const(128)
-PYBADGE_BUTTON_UP = const(64)
-PYBADGE_BUTTON_DOWN = const(32)
-PYBADGE_BUTTON_RIGHT = const(16)
+PYBADGE_BUTTON_LEFT = const(7)
+PYBADGE_BUTTON_UP = const(6)
+PYBADGE_BUTTON_DOWN = const(5)
+PYBADGE_BUTTON_RIGHT = const(4)
 # PyBadge & PyGamer
-PYBADGE_BUTTON_A = const(2)
+PYBADGE_BUTTON_A = const(1)
 
 
 class CursorManager:
@@ -33,6 +36,8 @@ class CursorManager:
     def __init__(self, cursor):
         self._cursor = cursor
         self._is_clicked = False
+        self._pad_states = 0
+        self._event = Event()
         self._init_hardware()
 
     def __enter__(self):
@@ -47,6 +52,7 @@ class CursorManager:
         self._pad.deinit()
         self._cursor.deinit()
         self._cursor = None
+        self._event = None
 
     def _is_deinited(self):
         """Checks if CursorManager object has been deinitd."""
@@ -66,6 +72,7 @@ class CursorManager:
                 "btn_down": PYBADGE_BUTTON_DOWN,
                 "btn_a": PYBADGE_BUTTON_A,
             }
+            self._pad_states = 0
         elif hasattr(board, "JOYSTICK_X"):
             self._joystick_x = analogio.AnalogIn(board.JOYSTICK_X)
             self._joystick_y = analogio.AnalogIn(board.JOYSTICK_Y)
@@ -77,10 +84,12 @@ class CursorManager:
             raise AttributeError(
                 "Board must have a D-Pad or Joystick for use with CursorManager!"
             )
-        self._pad = GamePadShift(
-            digitalio.DigitalInOut(board.BUTTON_CLOCK),
-            digitalio.DigitalInOut(board.BUTTON_OUT),
-            digitalio.DigitalInOut(board.BUTTON_LATCH),
+        self._pad = ShiftRegisterKeys(
+            clock=board.BUTTON_CLOCK,
+            data=board.BUTTON_OUT,
+            latch=board.BUTTON_LATCH,
+            key_count=8,
+            value_when_pressed=True,
         )
 
     @property
@@ -92,11 +101,12 @@ class CursorManager:
 
     def update(self):
         """Updates the cursor object."""
-        pressed = self._pad.get_pressed()
-        self._check_cursor_movement(pressed)
+        if self._pad.events.get_into(self._event):
+            self._store_button_states()
+        self._check_cursor_movement()
         if self._is_clicked:
             self._is_clicked = False
-        elif pressed & self._pad_btns["btn_a"]:
+        elif self._pad_states & (1 << self._pad_btns["btn_a"]):
             self._is_clicked = True
 
     def _read_joystick_x(self, samples=3):
@@ -106,7 +116,7 @@ class CursorManager:
         reading = 0
         # pylint: disable=unused-variable
         if hasattr(board, "JOYSTICK_X"):
-            for sample in range(0, samples):
+            for _ in range(0, samples):
                 reading += self._joystick_x.value
             reading /= samples
         return reading
@@ -118,24 +128,33 @@ class CursorManager:
         reading = 0
         # pylint: disable=unused-variable
         if hasattr(board, "JOYSTICK_Y"):
-            for sample in range(0, samples):
+            for _ in range(0, samples):
                 reading += self._joystick_y.value
             reading /= samples
         return reading
 
-    def _check_cursor_movement(self, pressed=None):
-        """Checks the PyBadge D-Pad or the PyGamer's Joystick for movement.
-        :param int pressed: 8-bit number with bits that correspond to buttons
-            which have been pressed down since the last call to get_pressed().
+    def _store_button_states(self):
+        """Stores the state of the PyBadge's D-Pad or the PyGamer's Joystick
+        into a byte
+
+        :param Event event: The latest button press transition event detected.
         """
+        bit_index = self._event.key_number
+        current_state = (self._pad_states >> bit_index) & 1
+        if current_state != self._event.pressed:
+            self._pad_states = (1 << bit_index) ^ self._pad_states
+
+    def _check_cursor_movement(self):
+        """Checks the PyBadge D-Pad or the PyGamer's Joystick for movement."""
         if hasattr(board, "BUTTON_CLOCK") and not hasattr(board, "JOYSTICK_X"):
-            if pressed & self._pad_btns["btn_right"]:
+            if self._pad_states & (1 << self._pad_btns["btn_right"]):
                 self._cursor.x += self._cursor.speed
-            elif pressed & self._pad_btns["btn_left"]:
+            elif self._pad_states & (1 << self._pad_btns["btn_left"]):
                 self._cursor.x -= self._cursor.speed
-            if pressed & self._pad_btns["btn_up"]:
+
+            if self._pad_states & (1 << self._pad_btns["btn_up"]):
                 self._cursor.y -= self._cursor.speed
-            elif pressed & self._pad_btns["btn_down"]:
+            elif self._pad_states & (1 << self._pad_btns["btn_down"]):
                 self._cursor.y += self._cursor.speed
         elif hasattr(board, "JOYSTICK_X"):
             joy_x = self._read_joystick_x()
@@ -165,9 +184,8 @@ class DebouncedCursorManager(CursorManager):
 
     def __init__(self, cursor, debounce_interval=0.01):
         CursorManager.__init__(self, cursor)
-        self._pressed = 0
         self._debouncer = Debouncer(
-            lambda: bool(self._pressed & self._pad_btns["btn_a"]),
+            lambda: bool(self._pad_states & (1 << self._pad_btns["btn_a"])),
             interval=debounce_interval,
         )
 
@@ -194,6 +212,7 @@ class DebouncedCursorManager(CursorManager):
 
     def update(self):
         """Updates the cursor object."""
-        self._pressed = self._pad.get_pressed()
-        self._check_cursor_movement(self._pressed)
+        if self._pad.events.get_into(self._event):
+            self._store_button_states()
+        self._check_cursor_movement()
         self._debouncer.update()

@@ -226,7 +226,10 @@ class Cursor:
         self._cursor_grp.append(self._cur_sprite)
 
     def generate_cursor(self, bmp):
-        """Generates a cursor icon"""
+        """Generates a cursor icon
+        
+        :param ~displayio.Bitmap bmp: Bitmap to use for the cursor
+        """
         self._is_deinited()
         self._cursor_grp = displayio.Group(scale=self._scale)
         self._cur_palette = displayio.Palette(3)

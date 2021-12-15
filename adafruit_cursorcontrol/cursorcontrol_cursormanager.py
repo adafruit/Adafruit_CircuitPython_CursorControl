@@ -14,6 +14,13 @@ import analogio
 from keypad import ShiftRegisterKeys, Event
 from adafruit_debouncer import Debouncer
 
+try:
+    from typing import Optional, Type
+    from types import TracebackType
+    from adafruit_cursorcontrol.cursorcontrol import Cursor
+except ImportError:
+    pass
+
 __version__ = "0.0.0-auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_CursorControl.git"
 
@@ -33,20 +40,20 @@ class CursorManager:
     :param Cursor cursor: The cursor object we are using.
     """
 
-    def __init__(self, cursor):
+    def __init__(self, cursor: Cursor) -> None:
         self._cursor = cursor
         self._is_clicked = False
         self._pad_states = 0
         self._event = Event()
         self._init_hardware()
 
-    def __enter__(self):
+    def __enter__(self) -> 'CursorManager':
         return self
 
-    def __exit__(self, exception_type, exception_value, traceback):
+    def __exit__(self, exception_type: Optional[Type[type]], exception_value: Optional[BaseException], traceback: Optional[TracebackType]) -> None:
         self.deinit()
 
-    def deinit(self):
+    def deinit(self) -> None:
         """Deinitializes a CursorManager object."""
         self._is_deinited()
         self._pad.deinit()
@@ -54,7 +61,7 @@ class CursorManager:
         self._cursor = None
         self._event = None
 
-    def _is_deinited(self):
+    def _is_deinited(self) -> None:
         """Checks if CursorManager object has been deinitd."""
         if self._cursor is None:
             raise ValueError(
@@ -62,7 +69,7 @@ class CursorManager:
                 "be used. Create a new CursorManager object."
             )
 
-    def _init_hardware(self):
+    def _init_hardware(self) -> None:
         """Initializes PyBadge or PyGamer hardware."""
         if hasattr(board, "BUTTON_CLOCK") and not hasattr(board, "JOYSTICK_X"):
             self._pad_btns = {
@@ -93,13 +100,13 @@ class CursorManager:
         )
 
     @property
-    def is_clicked(self):
+    def is_clicked(self) -> bool:
         """Returns True if the cursor button was pressed
         during previous call to update()
         """
         return self._is_clicked
 
-    def update(self):
+    def update(self) -> None:
         """Updates the cursor object."""
         if self._pad.events.get_into(self._event):
             self._store_button_states()
@@ -109,7 +116,7 @@ class CursorManager:
         elif self._pad_states & (1 << self._pad_btns["btn_a"]):
             self._is_clicked = True
 
-    def _read_joystick_x(self, samples=3):
+    def _read_joystick_x(self, samples: int = 3) -> float:
         """Read the X analog joystick on the PyGamer.
         :param int samples: How many samples to read and average.
         """
@@ -121,7 +128,7 @@ class CursorManager:
             reading /= samples
         return reading
 
-    def _read_joystick_y(self, samples=3):
+    def _read_joystick_y(self, samples: int = 3) -> float:
         """Read the Y analog joystick on the PyGamer.
         :param int samples: How many samples to read and average.
         """
@@ -133,7 +140,7 @@ class CursorManager:
             reading /= samples
         return reading
 
-    def _store_button_states(self):
+    def _store_button_states(self) -> None:
         """Stores the state of the PyBadge's D-Pad or the PyGamer's Joystick
         into a byte
         """
@@ -142,7 +149,7 @@ class CursorManager:
         if current_state != self._event.pressed:
             self._pad_states = (1 << bit_index) ^ self._pad_states
 
-    def _check_cursor_movement(self):
+    def _check_cursor_movement(self) -> None:
         """Checks the PyBadge D-Pad or the PyGamer's Joystick for movement."""
         if hasattr(board, "BUTTON_CLOCK") and not hasattr(board, "JOYSTICK_X"):
             if self._pad_states & (1 << self._pad_btns["btn_right"]):
@@ -180,7 +187,7 @@ class DebouncedCursorManager(CursorManager):
     :param Cursor cursor: The cursor object we are using.
     """
 
-    def __init__(self, cursor, debounce_interval=0.01):
+    def __init__(self, cursor: Cursor, debounce_interval: float = 0.01) -> None:
         CursorManager.__init__(self, cursor)
         self._debouncer = Debouncer(
             lambda: bool(self._pad_states & (1 << self._pad_btns["btn_a"])),
@@ -188,7 +195,7 @@ class DebouncedCursorManager(CursorManager):
         )
 
     @property
-    def is_clicked(self):
+    def is_clicked(self) -> bool:
         """Returns True if the cursor button was pressed
         during previous call to update()
         """
@@ -197,18 +204,18 @@ class DebouncedCursorManager(CursorManager):
     pressed = is_clicked
 
     @property
-    def released(self):
+    def released(self) -> bool:
         """Returns True if the cursor button was released
         during previous call to update()
         """
         return self._debouncer.fell
 
     @property
-    def held(self):
+    def held(self) -> bool:
         """Returns True if the cursor button is currently being held"""
         return self._debouncer.value
 
-    def update(self):
+    def update(self) -> None:
         """Updates the cursor object."""
         if self._pad.events.get_into(self._event):
             self._store_button_states()

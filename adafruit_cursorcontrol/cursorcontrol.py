@@ -22,6 +22,12 @@ Implementation Notes
 """
 import displayio
 
+try:
+    from typing import Optional, Type
+    from types import TracebackType
+except ImportError:
+    pass
+
 __version__ = "0.0.0-auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_CursorControl.git"
 
@@ -54,12 +60,12 @@ class Cursor:
     # pylint: disable=too-many-arguments,line-too-long
     def __init__(
         self,
-        display=None,
-        display_group=None,
-        bmp=None,
-        is_hidden=False,
-        cursor_speed=5,
-        scale=1,
+        display: Optional[displayio.Display] = None,
+        display_group: Optional[displayio.Group] = None,
+        bmp: Optional[displayio.Bitmap] = None,
+        is_hidden: bool = False,
+        cursor_speed: int = 5,
+        scale: int = 1,
     ):
         self._display = display
         self._scale = scale
@@ -76,19 +82,19 @@ class Cursor:
 
     # pylint: enable=too-many-arguments,line-too-long
 
-    def __enter__(self):
+    def __enter__(self) -> 'Cursor':
         return self
 
-    def __exit__(self, exception_type, exception_value, traceback):
+    def __exit__(self, exception_type: Optional[Type[type]], exception_value: Optional[BaseException], traceback: Optional[TracebackType]) -> None:
         self.deinit()
 
-    def deinit(self):
+    def deinit(self) -> None:
         """deinitializes the cursor object."""
         self._is_deinited()
         self._scale = None
         self._display_grp.remove(self._cursor_grp)
 
-    def _is_deinited(self):
+    def _is_deinited(self) -> None:
         """checks cursor deinitialization"""
         if self._scale is None:
             raise ValueError(
@@ -97,12 +103,12 @@ class Cursor:
             )
 
     @property
-    def scale(self):
+    def scale(self) -> int:
         """Returns the cursor's scale amount as an integer."""
         return self._scale
 
     @scale.setter
-    def scale(self, scale_value):
+    def scale(self, scale_value: int) -> None:
         """Scales the cursor by scale_value in both directions.
         :param int scale_value: Amount to scale the cursor by.
         """
@@ -112,12 +118,12 @@ class Cursor:
             self._cursor_grp.scale = scale_value
 
     @property
-    def speed(self):
+    def speed(self) -> int:
         """Returns the cursor's speed, in pixels."""
         return self._speed
 
     @speed.setter
-    def speed(self, speed):
+    def speed(self, speed: int) -> None:
         """Sets the speed of the cursor.
         :param int speed: Cursor movement speed, in pixels.
         """
@@ -126,12 +132,12 @@ class Cursor:
             self._speed = speed
 
     @property
-    def x(self):
+    def x(self) -> int:
         """Returns the cursor's x-coordinate."""
         return self._cursor_grp.x
 
     @x.setter
-    def x(self, x_val):
+    def x(self, x_val: int) -> None:
         """Sets the x-value of the cursor.
         :param int x_val: cursor x-position, in pixels.
         """
@@ -144,12 +150,12 @@ class Cursor:
             self._cursor_grp.x = x_val
 
     @property
-    def y(self):
+    def y(self) -> int:
         """Returns the cursor's y-coordinate."""
         return self._cursor_grp.y
 
     @y.setter
-    def y(self, y_val):
+    def y(self, y_val: int) -> None:
         """Sets the y-value of the cursor.
         :param int y_val: cursor y-position, in pixels.
         """
@@ -162,12 +168,12 @@ class Cursor:
             self._cursor_grp.y = y_val
 
     @property
-    def hidden(self):
+    def hidden(self) -> bool:
         """Returns True if the cursor is hidden or visible on the display."""
         return self._is_hidden
 
     @hidden.setter
-    def hidden(self, is_hidden):
+    def hidden(self, is_hidden: bool) -> None:
         self._is_deinited()
         if is_hidden:
             self._is_hidden = True
@@ -176,16 +182,16 @@ class Cursor:
             self._is_hidden = False
             self._display_grp.append(self._cursor_grp)
 
-    def hide(self):
+    def hide(self) -> None:
         """Hide the cursor."""
         self.hidden = True
 
-    def show(self):
+    def show(self) -> None:
         """Show the cursor."""
         self.hidden = False
 
     # pylint:disable=no-self-use
-    def _default_cursor_bitmap(self):
+    def _default_cursor_bitmap(self) -> displayio.Bitmap:
         bmp = displayio.Bitmap(20, 20, 3)
         # left edge, outline
         for i in range(0, bmp.height):
@@ -210,12 +216,12 @@ class Cursor:
     # pylint:enable=no-self-use
 
     @property
-    def cursor_bitmap(self):
+    def cursor_bitmap(self) -> displayio.Bitmap:
         """Return the cursor bitmap."""
         return self._cursor_bitmap
 
     @cursor_bitmap.setter
-    def cursor_bitmap(self, bmp):
+    def cursor_bitmap(self, bmp: displayio.Bitmap) -> None:
         """Set a new cursor bitmap.
 
         :param ~displayio.Bitmap bmp: A Bitmap to use for the cursor
@@ -225,7 +231,7 @@ class Cursor:
         self._cur_sprite = displayio.TileGrid(bmp, pixel_shader=self._cur_palette)
         self._cursor_grp.append(self._cur_sprite)
 
-    def generate_cursor(self, bmp):
+    def generate_cursor(self, bmp: displayio.Bitmap) -> None:
         """Generates a cursor icon
         
         :param ~displayio.Bitmap bmp: A Bitmap to use for the cursor

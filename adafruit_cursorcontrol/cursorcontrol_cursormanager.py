@@ -30,7 +30,7 @@ PYBADGE_BUTTON_A = const(1)
 class CursorManager:
     """Simple interaction user interface interaction for Adafruit_CursorControl.
 
-    :param adafruit_cursorcontrol cursor: The cursor object we are using.
+    :param Cursor cursor: The cursor object we are using.
     """
 
     def __init__(self, cursor):

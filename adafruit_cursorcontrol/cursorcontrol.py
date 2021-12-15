@@ -31,9 +31,9 @@ class Cursor:
 
     :param ~displayio.Display display: CircuitPython display object.
     :param ~displayio.Group display_group: CircuitPython group object to append the cursor to.
+    :param bool is_hidden: Cursor is hidden on init.
     :param int cursor_speed: Speed of the cursor, in pixels.
     :param int scale: Scale amount for the cursor in both directions.
-    :param bool is_hidden: Cursor is hidden on init.
 
     Example for creating a cursor layer
 

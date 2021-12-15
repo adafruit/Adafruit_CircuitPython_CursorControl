@@ -228,7 +228,7 @@ class Cursor:
     def generate_cursor(self, bmp):
         """Generates a cursor icon
         
-        :param ~displayio.Bitmap bmp: Bitmap to use for the cursor
+        :param ~displayio.Bitmap bmp: A Bitmap to use for the cursor
         """
         self._is_deinited()
         self._cursor_grp = displayio.Group(scale=self._scale)

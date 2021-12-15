@@ -177,7 +177,7 @@ class DebouncedCursorManager(CursorManager):
     the button is just pressed, and just released, as well it's current state. "Just" in this
     context means "since the previous call to update."
 
-    :param adafruit_cursorcontrol cursor: The cursor object we are using.
+    :param Cursor cursor: The cursor object we are using.
     """
 
     def __init__(self, cursor, debounce_interval=0.01):

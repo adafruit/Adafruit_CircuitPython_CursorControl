@@ -136,8 +136,6 @@ class CursorManager:
     def _store_button_states(self):
         """Stores the state of the PyBadge's D-Pad or the PyGamer's Joystick
         into a byte
-
-        :param Event event: The latest button press transition event detected.
         """
         bit_index = self._event.key_number
         current_state = (self._pad_states >> bit_index) & 1

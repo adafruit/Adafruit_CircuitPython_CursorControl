@@ -47,10 +47,15 @@ class CursorManager:
         self._event = Event()
         self._init_hardware()
 
-    def __enter__(self) -> 'CursorManager':
+    def __enter__(self) -> "CursorManager":
         return self
 
-    def __exit__(self, exception_type: Optional[Type[type]], exception_value: Optional[BaseException], traceback: Optional[TracebackType]) -> None:
+    def __exit__(
+        self,
+        exception_type: Optional[Type[type]],
+        exception_value: Optional[BaseException],
+        traceback: Optional[TracebackType],
+    ) -> None:
         self.deinit()
 
     def deinit(self) -> None:

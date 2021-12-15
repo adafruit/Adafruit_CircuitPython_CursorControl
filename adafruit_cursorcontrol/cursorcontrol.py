@@ -82,10 +82,15 @@ class Cursor:
 
     # pylint: enable=too-many-arguments,line-too-long
 
-    def __enter__(self) -> 'Cursor':
+    def __enter__(self) -> "Cursor":
         return self
 
-    def __exit__(self, exception_type: Optional[Type[type]], exception_value: Optional[BaseException], traceback: Optional[TracebackType]) -> None:
+    def __exit__(
+        self,
+        exception_type: Optional[Type[type]],
+        exception_value: Optional[BaseException],
+        traceback: Optional[TracebackType],
+    ) -> None:
         self.deinit()
 
     def deinit(self) -> None:
@@ -233,7 +238,7 @@ class Cursor:
 
     def generate_cursor(self, bmp: displayio.Bitmap) -> None:
         """Generates a cursor icon
-        
+
         :param ~displayio.Bitmap bmp: A Bitmap to use for the cursor
         """
         self._is_deinited()

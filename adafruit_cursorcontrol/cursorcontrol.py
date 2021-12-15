@@ -218,7 +218,7 @@ class Cursor:
     def cursor_bitmap(self, bmp):
         """Set a new cursor bitmap.
 
-        :param bmp: A Bitmap to use for the cursor
+        :param ~displayio.Bitmap bmp: A Bitmap to use for the cursor
         """
         self._cursor_bitmap = bmp
         self._cursor_grp.remove(self._cur_sprite)

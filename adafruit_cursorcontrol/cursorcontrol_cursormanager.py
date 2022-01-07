@@ -32,6 +32,7 @@ PYBADGE_BUTTON_DOWN = const(5)
 PYBADGE_BUTTON_RIGHT = const(4)
 # PyBadge & PyGamer
 PYBADGE_BUTTON_A = const(1)
+PYBADGE_BUTTON_B = const(0)
 
 
 class CursorManager:
@@ -43,6 +44,7 @@ class CursorManager:
     def __init__(self, cursor: Cursor) -> None:
         self._cursor = cursor
         self._is_clicked = False
+        self._is_alt_clicked = False
         self._pad_states = 0
         self._event = Event()
         self._init_hardware()
@@ -83,12 +85,13 @@ class CursorManager:
                 "btn_up": PYBADGE_BUTTON_UP,
                 "btn_down": PYBADGE_BUTTON_DOWN,
                 "btn_a": PYBADGE_BUTTON_A,
+                "btn_b": PYBADGE_BUTTON_B,
             }
             self._pad_states = 0
         elif hasattr(board, "JOYSTICK_X"):
             self._joystick_x = analogio.AnalogIn(board.JOYSTICK_X)
             self._joystick_y = analogio.AnalogIn(board.JOYSTICK_Y)
-            self._pad_btns = {"btn_a": PYBADGE_BUTTON_A}
+            self._pad_btns = {"btn_a": PYBADGE_BUTTON_A, "btn_b": PYBADGE_BUTTON_B}
             # Sample the center points of the joystick
             self._center_x = self._joystick_x.value
             self._center_y = self._joystick_y.value
@@ -111,6 +114,13 @@ class CursorManager:
         """
         return self._is_clicked
 
+    @property
+    def is_alt_clicked(self) -> bool:
+        """Returns True if the cursor button was pressed
+        during previous call to update()
+        """
+        return self._is_alt_clicked
+
     def update(self) -> None:
         """Updates the cursor object."""
         if self._pad.events.get_into(self._event):
@@ -120,6 +130,11 @@ class CursorManager:
             self._is_clicked = False
         elif self._pad_states & (1 << self._pad_btns["btn_a"]):
             self._is_clicked = True
+
+        if self._is_alt_clicked:
+            self._is_alt_clicked = False
+        elif self._pad_states & (1 << self._pad_btns["btn_b"]):
+            self._is_alt_clicked = True
 
     def _read_joystick_x(self, samples: int = 3) -> float:
         """Read the X analog joystick on the PyGamer.

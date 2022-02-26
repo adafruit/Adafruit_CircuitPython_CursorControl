@@ -42,6 +42,7 @@ class CursorManager:
 
     :param Cursor cursor: The cursor object we are using.
     """
+
     # pylint: disable=too-many-instance-attributes
 
     def __init__(self, cursor: Cursor) -> None:
@@ -96,10 +97,12 @@ class CursorManager:
         elif hasattr(board, "JOYSTICK_X"):
             self._joystick_x = analogio.AnalogIn(board.JOYSTICK_X)
             self._joystick_y = analogio.AnalogIn(board.JOYSTICK_Y)
-            self._pad_btns = {"btn_a": PYBADGE_BUTTON_A,
-                              "btn_b": PYBADGE_BUTTON_B,
-                              "btn_select": PYBADGE_BUTTON_SELECT,
-                              "btn_start": PYBADGE_BUTTON_START}
+            self._pad_btns = {
+                "btn_a": PYBADGE_BUTTON_A,
+                "btn_b": PYBADGE_BUTTON_B,
+                "btn_select": PYBADGE_BUTTON_SELECT,
+                "btn_start": PYBADGE_BUTTON_START,
+            }
             # Sample the center points of the joystick
             self._center_x = self._joystick_x.value
             self._center_y = self._joystick_y.value

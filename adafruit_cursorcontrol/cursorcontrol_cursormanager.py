@@ -42,6 +42,7 @@ class CursorManager:
 
     :param Cursor cursor: The cursor object we are using.
     """
+    # pylint: disable=too-many-instance-attributes
 
     def __init__(self, cursor: Cursor) -> None:
         self._cursor = cursor

@@ -236,45 +236,103 @@ class CursorManager:
 
 
 class DebouncedCursorManager(CursorManager):
-    """Simple interaction user interface interaction for Adafruit_CursorControl.
-    This subclass provide a debounced version on the A button and provides queries for when
-    the button is just pressed, and just released, as well it's current state. "Just" in this
-    context means "since the previous call to update."
+    """Simple user interface interaction for Adafruit_CursorControl.
+    This subclass provide a debounced version on the A, B, Start or Select buttons
+    and provides queries for when the buttons are just pressed, and just released,
+    as well their current state. "Just" in this context means "since the previous call to update."
 
     :param Cursor cursor: The cursor object we are using.
     """
 
     def __init__(self, cursor: Cursor, debounce_interval: float = 0.01) -> None:
         CursorManager.__init__(self, cursor)
-        self._debouncer = Debouncer(
-            lambda: bool(self._pad_states & (1 << self._pad_btns["btn_a"])),
-            interval=debounce_interval,
-        )
+        self._debouncers = {}
+        for btn, _ in self._pad_btns.items():
+            self._debouncers[btn] = Debouncer(
+                lambda btn=btn: bool((self._pad_states & (1 << self._pad_btns[btn]))),
+                interval=debounce_interval,
+            )
 
     @property
     def is_clicked(self) -> bool:
-        """Returns True if the cursor button was pressed
+        """Returns True if the cursor A button was pressed
         during previous call to update()
         """
-        return self._debouncer.rose
+        return self._debouncers["btn_a"].rose
 
-    pressed = is_clicked
+    @property
+    def is_alt_clicked(self) -> bool:
+        """Returns True if the cursor B button was pressed
+        during previous call to update()
+        """
+        return self._debouncers["btn_b"].rose
+
+    @property
+    def is_select_clicked(self) -> bool:
+        """Returns True if the Select button was pressed
+        during previous call to update()
+        """
+        return self._debouncers["btn_select"].rose
+
+    @property
+    def is_start_clicked(self) -> bool:
+        """Returns True if the Start button was pressed
+        during previous call to update()
+        """
+        return self._debouncers["btn_start"].rose
 
     @property
     def released(self) -> bool:
-        """Returns True if the cursor button was released
+        """Returns True if the cursor A button was released
         during previous call to update()
         """
-        return self._debouncer.fell
+        return self._debouncers["btn_a"].fell
+
+    @property
+    def alt_released(self) -> bool:
+        """Returns True if the cursor B button was released
+        during previous call to update()
+        """
+        return self._debouncers["btn_b"].fell
+
+    @property
+    def start_released(self) -> bool:
+        """Returns True if the cursor Start button was released
+        during previous call to update()
+        """
+        return self._debouncers["btn_start"].fell
+
+    @property
+    def select_released(self) -> bool:
+        """Returns True if the cursor Select button was released
+        during previous call to update()
+        """
+        return self._debouncers["btn_select"].fell
 
     @property
     def held(self) -> bool:
-        """Returns True if the cursor button is currently being held"""
-        return self._debouncer.value
+        """Returns True if the cursor A button is currently being held"""
+        return self._debouncers["btn_a"].value
+
+    @property
+    def alt_held(self) -> bool:
+        """Returns True if the cursor B button is currently being held"""
+        return self._debouncers["btn_b"].value
+
+    @property
+    def start_held(self) -> bool:
+        """Returns True if the cursor Start button is currently being held"""
+        return self._debouncers["btn_start"].value
+
+    @property
+    def select_held(self) -> bool:
+        """Returns True if the cursor Select is currently being held"""
+        return self._debouncers["btn_select"].value
 
     def update(self) -> None:
         """Updates the cursor object."""
         if self._pad.events.get_into(self._event):
             self._store_button_states()
         self._check_cursor_movement()
-        self._debouncer.update()
+        for debouncer in self._debouncers.values():
+            debouncer.update()

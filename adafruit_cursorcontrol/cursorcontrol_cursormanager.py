@@ -92,6 +92,8 @@ class CursorManager:
                 "btn_down": PYBADGE_BUTTON_DOWN,
                 "btn_a": PYBADGE_BUTTON_A,
                 "btn_b": PYBADGE_BUTTON_B,
+                "btn_select": PYBADGE_BUTTON_SELECT,
+                "btn_start": PYBADGE_BUTTON_START,
             }
             self._pad_states = 0
         elif hasattr(board, "JOYSTICK_X"):

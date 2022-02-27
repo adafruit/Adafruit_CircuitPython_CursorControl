@@ -31,6 +31,8 @@ PYBADGE_BUTTON_UP = const(6)
 PYBADGE_BUTTON_DOWN = const(5)
 PYBADGE_BUTTON_RIGHT = const(4)
 # PyBadge & PyGamer
+PYBADGE_BUTTON_SELECT = const(3)
+PYBADGE_BUTTON_START = const(2)
 PYBADGE_BUTTON_A = const(1)
 PYBADGE_BUTTON_B = const(0)
 
@@ -41,10 +43,14 @@ class CursorManager:
     :param Cursor cursor: The cursor object we are using.
     """
 
+    # pylint: disable=too-many-instance-attributes
+
     def __init__(self, cursor: Cursor) -> None:
         self._cursor = cursor
         self._is_clicked = False
         self._is_alt_clicked = False
+        self._is_select_clicked = False
+        self._is_start_clicked = False
         self._pad_states = 0
         self._event = Event()
         self._init_hardware()
@@ -86,12 +92,19 @@ class CursorManager:
                 "btn_down": PYBADGE_BUTTON_DOWN,
                 "btn_a": PYBADGE_BUTTON_A,
                 "btn_b": PYBADGE_BUTTON_B,
+                "btn_select": PYBADGE_BUTTON_SELECT,
+                "btn_start": PYBADGE_BUTTON_START,
             }
             self._pad_states = 0
         elif hasattr(board, "JOYSTICK_X"):
             self._joystick_x = analogio.AnalogIn(board.JOYSTICK_X)
             self._joystick_y = analogio.AnalogIn(board.JOYSTICK_Y)
-            self._pad_btns = {"btn_a": PYBADGE_BUTTON_A, "btn_b": PYBADGE_BUTTON_B}
+            self._pad_btns = {
+                "btn_a": PYBADGE_BUTTON_A,
+                "btn_b": PYBADGE_BUTTON_B,
+                "btn_select": PYBADGE_BUTTON_SELECT,
+                "btn_start": PYBADGE_BUTTON_START,
+            }
             # Sample the center points of the joystick
             self._center_x = self._joystick_x.value
             self._center_y = self._joystick_y.value
@@ -109,17 +122,31 @@ class CursorManager:
 
     @property
     def is_clicked(self) -> bool:
-        """Returns True if the cursor button was pressed
+        """Returns True if the cursor A button was pressed
         during previous call to update()
         """
         return self._is_clicked
 
     @property
     def is_alt_clicked(self) -> bool:
-        """Returns True if the cursor button was pressed
+        """Returns True if the cursor B button was pressed
         during previous call to update()
         """
         return self._is_alt_clicked
+
+    @property
+    def is_select_clicked(self) -> bool:
+        """Returns True if the Select button was pressed
+        during previous call to update()
+        """
+        return self._is_select_clicked
+
+    @property
+    def is_start_clicked(self) -> bool:
+        """Returns True if the Start button was pressed
+        during previous call to update()
+        """
+        return self._is_start_clicked
 
     def update(self) -> None:
         """Updates the cursor object."""
@@ -135,6 +162,16 @@ class CursorManager:
             self._is_alt_clicked = False
         elif self._pad_states & (1 << self._pad_btns["btn_b"]):
             self._is_alt_clicked = True
+
+        if self._is_select_clicked:
+            self._is_select_clicked = False
+        elif self._pad_states & (1 << self._pad_btns["btn_select"]):
+            self._is_select_clicked = True
+
+        if self._is_start_clicked:
+            self._is_start_clicked = False
+        elif self._pad_states & (1 << self._pad_btns["btn_start"]):
+            self._is_start_clicked = True
 
     def _read_joystick_x(self, samples: int = 3) -> float:
         """Read the X analog joystick on the PyGamer.

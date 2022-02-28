@@ -247,7 +247,7 @@ class DebouncedCursorManager(CursorManager):
     def __init__(self, cursor: Cursor, debounce_interval: float = 0.01) -> None:
         CursorManager.__init__(self, cursor)
         self._debouncers = {}
-        for btn, _ in self._pad_btns.items():
+        for btn in self._pad_btns:
             self._debouncers[btn] = Debouncer(
                 lambda btn=btn: bool((self._pad_states & (1 << self._pad_btns[btn]))),
                 interval=debounce_interval,

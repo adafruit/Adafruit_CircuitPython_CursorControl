@@ -40,7 +40,7 @@ classifiers = [
 dynamic = ["dependencies", "optional-dependencies"]
 
 [tool.setuptools]
-py-modules = ["adafruit_cursorcontrol"]
+packages = ["adafruit_cursorcontrol"]
 
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}

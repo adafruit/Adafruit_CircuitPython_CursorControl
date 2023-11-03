@@ -118,7 +118,7 @@ splash.append(start_button)
 splash.append(select_button)
 splash.append(a_button)
 splash.append(b_button)
-display.show(splash)
+display.root_group = splash
 
 while True:
     debounced_cursor.update()

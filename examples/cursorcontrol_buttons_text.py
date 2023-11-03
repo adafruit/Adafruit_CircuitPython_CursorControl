@@ -115,7 +115,7 @@ mouse_cursor = Cursor(display, display_group=splash)
 cursor = CursorManager(mouse_cursor)
 
 # show displayio group
-display.show(splash)
+display.root_group = splash
 
 prev_btn = None
 while True:

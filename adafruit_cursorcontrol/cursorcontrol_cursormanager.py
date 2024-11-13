@@ -47,7 +47,7 @@ class CursorManager:
     # pylint: disable=too-many-instance-attributes
 
     def __init__(
-        self, cursor: Cursor, shift_register_keys: ShiftRegisterKeys = None
+        self, cursor: Cursor, shift_register_keys: Optional[ShiftRegisterKeys] = None
     ) -> None:
         self._cursor = cursor
         self._is_clicked = False

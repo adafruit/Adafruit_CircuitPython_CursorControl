@@ -24,7 +24,6 @@ except ImportError:
 __version__ = "0.0.0+auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_CursorControl.git"
 
-
 # PyBadge
 PYBADGE_BUTTON_LEFT = const(7)
 PYBADGE_BUTTON_UP = const(6)
@@ -41,11 +40,15 @@ class CursorManager:
     """Simple interaction user interface interaction for Adafruit_CursorControl.
 
     :param Cursor cursor: The cursor object we are using.
+    :param ShiftRegisterKeys shift_register_keys: Optional initialized ShiftRegisterKeys object
+      to use instead of having CursorManager initialize and control it.
     """
 
     # pylint: disable=too-many-instance-attributes
 
-    def __init__(self, cursor: Cursor) -> None:
+    def __init__(
+        self, cursor: Cursor, shift_register_keys: ShiftRegisterKeys = None
+    ) -> None:
         self._cursor = cursor
         self._is_clicked = False
         self._is_alt_clicked = False
@@ -53,6 +56,7 @@ class CursorManager:
         self._is_start_clicked = False
         self._pad_states = 0
         self._event = Event()
+        self._pad = shift_register_keys
         self._init_hardware()
 
     def __enter__(self) -> "CursorManager":
@@ -112,13 +116,14 @@ class CursorManager:
             raise AttributeError(
                 "Board must have a D-Pad or Joystick for use with CursorManager!"
             )
-        self._pad = ShiftRegisterKeys(
-            clock=board.BUTTON_CLOCK,
-            data=board.BUTTON_OUT,
-            latch=board.BUTTON_LATCH,
-            key_count=8,
-            value_when_pressed=True,
-        )
+        if self._pad is None:
+            self._pad = ShiftRegisterKeys(
+                clock=board.BUTTON_CLOCK,
+                data=board.BUTTON_OUT,
+                latch=board.BUTTON_LATCH,
+                key_count=8,
+                value_when_pressed=True,
+            )
 
     @property
     def is_clicked(self) -> bool:

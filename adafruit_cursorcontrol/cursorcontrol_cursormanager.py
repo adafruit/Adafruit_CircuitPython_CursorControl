@@ -8,15 +8,17 @@
 Simple interaction user interface interaction for Adafruit_CursorControl.
 * Author(s): Brent Rubell
 """
-import board
-from micropython import const
+
 import analogio
-from keypad import ShiftRegisterKeys, Event
+import board
 from adafruit_debouncer import Debouncer
+from keypad import Event, ShiftRegisterKeys
+from micropython import const
 
 try:
-    from typing import Optional, Type
     from types import TracebackType
+    from typing import Optional, Type
+
     from adafruit_cursorcontrol.cursorcontrol import Cursor
 except ImportError:
     pass
@@ -43,8 +45,6 @@ class CursorManager:
     :param ShiftRegisterKeys shift_register_keys: Optional initialized ShiftRegisterKeys object
       to use instead of having CursorManager initialize and control it.
     """
-
-    # pylint: disable=too-many-instance-attributes
 
     def __init__(
         self, cursor: Cursor, shift_register_keys: Optional[ShiftRegisterKeys] = None
@@ -113,9 +113,7 @@ class CursorManager:
             self._center_x = self._joystick_x.value
             self._center_y = self._joystick_y.value
         else:
-            raise AttributeError(
-                "Board must have a D-Pad or Joystick for use with CursorManager!"
-            )
+            raise AttributeError("Board must have a D-Pad or Joystick for use with CursorManager!")
         if self._pad is None:
             self._pad = ShiftRegisterKeys(
                 clock=board.BUTTON_CLOCK,
@@ -183,7 +181,6 @@ class CursorManager:
         :param int samples: How many samples to read and average.
         """
         reading = 0
-        # pylint: disable=unused-variable
         if hasattr(board, "JOYSTICK_X"):
             for _ in range(0, samples):
                 reading += self._joystick_x.value
@@ -195,7 +192,6 @@ class CursorManager:
         :param int samples: How many samples to read and average.
         """
         reading = 0
-        # pylint: disable=unused-variable
         if hasattr(board, "JOYSTICK_Y"):
             for _ in range(0, samples):
                 reading += self._joystick_y.value
@@ -235,9 +231,7 @@ class CursorManager:
             elif joy_y < self._center_y - 1000:
                 self._cursor.y -= self._cursor.speed
         else:
-            raise AttributeError(
-                "Board must have a D-Pad or Joystick for use with CursorManager!"
-            )
+            raise AttributeError("Board must have a D-Pad or Joystick for use with CursorManager!")
 
 
 class DebouncedCursorManager(CursorManager):
@@ -254,7 +248,7 @@ class DebouncedCursorManager(CursorManager):
         self._debouncers = {}
         for btn in self._pad_btns:
             self._debouncers[btn] = Debouncer(
-                lambda btn=btn: bool((self._pad_states & (1 << self._pad_btns[btn]))),
+                lambda btn=btn: bool(self._pad_states & (1 << self._pad_btns[btn])),
                 interval=debounce_interval,
             )
 

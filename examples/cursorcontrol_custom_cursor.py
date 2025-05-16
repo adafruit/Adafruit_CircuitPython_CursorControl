@@ -2,8 +2,10 @@
 # SPDX-License-Identifier: MIT
 
 import time
+
 import board
 import displayio
+
 from adafruit_cursorcontrol.cursorcontrol import Cursor
 from adafruit_cursorcontrol.cursorcontrol_cursormanager import CursorManager
 

@@ -2,11 +2,12 @@
 # SPDX-License-Identifier: MIT
 
 import time
+
 import board
 import displayio
 import terminalio
-
 from adafruit_button import Button
+
 from adafruit_cursorcontrol.cursorcontrol import Cursor
 from adafruit_cursorcontrol.cursorcontrol_cursormanager import DebouncedCursorManager
 

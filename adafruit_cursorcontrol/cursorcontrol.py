@@ -20,11 +20,12 @@ Implementation Notes
   https://github.com/adafruit/circuitpython/releases
 
 """
+
 import displayio
 
 try:
-    from typing import Optional, Type
     from types import TracebackType
+    from typing import Optional, Type
 except ImportError:
     pass
 
@@ -57,7 +58,6 @@ class Cursor:
         mouse_cursor = Cursor(display, display_group=splash)
     """
 
-    # pylint: disable=too-many-arguments,line-too-long
     def __init__(
         self,
         display: Optional[displayio.Display] = None,
@@ -79,8 +79,6 @@ class Cursor:
         else:
             self._cursor_bitmap = bmp
         self.generate_cursor(self._cursor_bitmap)
-
-    # pylint: enable=too-many-arguments,line-too-long
 
     def __enter__(self) -> "Cursor":
         return self

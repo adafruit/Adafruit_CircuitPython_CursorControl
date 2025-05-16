@@ -2,11 +2,13 @@
 # SPDX-License-Identifier: MIT
 
 import time
+
 import board
 import displayio
+import terminalio
 from adafruit_button import Button
 from adafruit_display_text import label
-import terminalio
+
 from adafruit_cursorcontrol.cursorcontrol import Cursor
 from adafruit_cursorcontrol.cursorcontrol_cursormanager import CursorManager
 
@@ -136,6 +138,6 @@ while True:
                 prev_btn = b
     elif prev_btn is not None:
         prev_btn.selected = False
-    text_speed.text = "Speed: {0}px".format(mouse_cursor.speed)
-    text_scale.text = "Scale: {0}px".format(mouse_cursor.scale)
+    text_speed.text = f"Speed: {mouse_cursor.speed}px"
+    text_scale.text = f"Scale: {mouse_cursor.scale}px"
     time.sleep(0.1)

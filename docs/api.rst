@@ -1,3 +1,6 @@
+API Reference
+#############
+
 .. automodule:: adafruit_cursorcontrol.cursorcontrol
    :members:
 

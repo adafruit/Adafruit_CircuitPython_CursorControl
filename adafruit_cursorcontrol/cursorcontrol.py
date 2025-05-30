@@ -26,6 +26,8 @@ import displayio
 try:
     from types import TracebackType
     from typing import Optional, Type
+
+    from circuitpython_typing.displayio import AnyDisplay
 except ImportError:
     pass
 
@@ -36,7 +38,7 @@ __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_CursorControl.git
 class Cursor:
     """Mouse cursor interaction for CircuitPython.
 
-    :param ~displayio.Display display: CircuitPython display object.
+    :param ~AnyDisplay display: CircuitPython display object.
     :param ~displayio.Group display_group: CircuitPython group object to append the cursor to.
     :param ~displayio.Bitmap bmp: CircuitPython bitmap object to use as the cursor
     :param bool is_hidden: Cursor is hidden on init.
@@ -60,7 +62,7 @@ class Cursor:
 
     def __init__(
         self,
-        display: Optional[displayio.Display] = None,
+        display: Optional[AnyDisplay] = None,
         display_group: Optional[displayio.Group] = None,
         bmp: Optional[displayio.Bitmap] = None,
         is_hidden: bool = False,

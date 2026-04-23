@@ -126,7 +126,7 @@ while True:
         for i, b in enumerate(buttons):
             if b.contains((mouse_cursor.x, mouse_cursor.y)):
                 b.selected = True
-                print("Button %d pressed" % i)
+                print(f"Button {i} pressed")
                 if i == 0:  # Increase the cursor speed
                     mouse_cursor.speed += 1
                 elif i == 1:  # Decrease the cursor speed
